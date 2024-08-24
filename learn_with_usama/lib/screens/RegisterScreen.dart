@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:learn_with_usama/screens/Home.dart';
-import 'package:learn_with_usama/screens/RegisterScreen.dart';
 
-class LoginScreen extends StatelessWidget {
+import 'LoginScreen.dart';
+
+class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +32,7 @@ class LoginScreen extends StatelessWidget {
                 children: <Widget>[
                   SizedBox(height: 300.0),
                   Text(
-                    'Login',
+                    'Register',
                     style: GoogleFonts.nunito(
                       textStyle: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -92,21 +92,6 @@ class LoginScreen extends StatelessWidget {
                     ),
                     style: TextStyle(color: Colors.white), // Text color in TextField
                   ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextButton(
-                      onPressed: (){},
-                      child: Text('Forget Password?',
-                        style: GoogleFonts.nunito(
-                          textStyle: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15.0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
                   Padding(
                     padding: const EdgeInsets.only(top: 10.0),
                     child: Align(
@@ -128,11 +113,11 @@ class LoginScreen extends StatelessWidget {
                         onPressed: (){
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => Home()),
+                            MaterialPageRoute(builder: (context) => LoginScreen()),
                           );
                         },
                         child: Text(
-                          'Login',
+                          'Register',
                           style: GoogleFonts.lato(
                             textStyle:  TextStyle(
                                 color: Colors.white
@@ -148,7 +133,7 @@ class LoginScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         Text(
-                          'Don\'t have an account?',
+                          'If you already have an account.',
                           style: TextStyle(
                             color: Colors.white,
                           ),
@@ -157,10 +142,10 @@ class LoginScreen extends StatelessWidget {
                           onPressed: (){
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => RegisterScreen()),
+                              MaterialPageRoute(builder: (context) => LoginScreen()),
                             );
                           },
-                          child: Text('Register',
+                          child: Text('Login',
                             style: GoogleFonts.nunito(
                               textStyle: TextStyle(
                                 color: Colors.white,
