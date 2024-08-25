@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "451011012873",
+    "project_id": "leanwithusama",
+    "storage_bucket": "leanwithusama.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:451011012873:android:fb7b5b5e361460935fcbd8",
+        "android_client_info": {
+          "package_name": "com.usama.learn_with_usama"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC113nrM0VS4kN_wpKlG5oiF5RrjLKhHUo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

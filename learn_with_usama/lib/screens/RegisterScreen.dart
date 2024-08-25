@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'LoginScreen.dart';
 
 class RegisterScreen extends StatelessWidget {
+  static const String id = 'RegisterScreen';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
