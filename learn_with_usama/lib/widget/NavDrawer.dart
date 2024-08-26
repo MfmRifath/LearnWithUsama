@@ -1,8 +1,24 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:learn_with_usama/screens/LoginScreen.dart';
 
-class NavDrawer extends StatelessWidget {
+class NavDrawer extends StatefulWidget {
+  @override
+  State<NavDrawer> createState() => _NavDrawerState();
+}
+
+class _NavDrawerState extends State<NavDrawer> {
   @override
   Widget build(BuildContext context) {
+    Future<void> signOut() async {
+      try {
+        await FirebaseAuth.instance.signOut();
+        print('User signed out successfully.');
+        // Navigate to the login screen or any other appropriate screen
+      } catch (e) {
+        print('Error signing out: $e');
+      }
+    }
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -87,7 +103,13 @@ class NavDrawer extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.exit_to_app),
             title: Text('Logout'),
-            onTap: () => {Navigator.of(context).pop()},
+            onTap: () => {
+              setState(() {
+            signOut();
+            Navigator.pushNamed(context, LoginScreen.id);
+              }),
+
+            },
           ),
         ],
       ),

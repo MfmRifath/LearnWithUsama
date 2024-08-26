@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:learn_with_usama/models/Unit.dart';
 
 import 'Courses.dart';
 
@@ -8,6 +9,7 @@ class Section implements Courses {
   final String? sectionName;
   final String? sectionDuration;
   final String? coursesId;
+  Courses? courses;
 
   Section({
      this.sectionId,
@@ -58,7 +60,7 @@ class Section implements Courses {
   String get courseName => sectionName ?? ''; // Implement courseName
 
   @override
-  String? get unitId => sectionId;
+  String? get unitId => courses?.unitId ;
 
   @override
   // TODO: implement documentId
@@ -70,5 +72,16 @@ class Section implements Courses {
 
   @override
   // TODO: implement unitNumber
-  String? get unitNumber => throw UnimplementedError(); // Implement unitId, using sectionId as unitId
+  String? get unitNumber => throw UnimplementedError();
+
+  @override
+  Unit? unit;
+
+  @override
+  // TODO: implement payment
+  String? get payment => throw UnimplementedError();
+
+  @override
+  // TODO: implement overviewDescripton
+  String? get overviewDescripton => throw UnimplementedError(); // Implement unitId, using sectionId as unitId
 }

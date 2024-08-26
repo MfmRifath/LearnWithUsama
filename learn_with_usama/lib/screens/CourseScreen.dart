@@ -1,18 +1,26 @@
+import 'dart:core';
+
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:learn_with_usama/widget/AppBar.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../models/Section.dart';
 import '../models/Courses.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../models/Unit.dart';
+import '../widget/CourseLIst.dart';
+import '../widget/SectionList.dart';
+
 class CourseScreen extends StatefulWidget {
   final Section? section;
   final Courses? course;
+  final Unit? unit;
 
   const CourseScreen({
     Key? key,
     this.section,
-    this.course,
+    this.course, this.unit,
   }) : super(key: key);
 
   @override
@@ -32,7 +40,7 @@ class _CourseScreenState extends State<CourseScreen>
   List<Section> _sections = [];
   List<Courses> _courses = [];
   Map<String, List<Section>> _sectionsByCourseId = {};
-
+  bool isLesson = false;
   @override
   void initState() {
     super.initState();
@@ -309,229 +317,209 @@ class _CourseScreenState extends State<CourseScreen>
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Courses'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: _addCourse,
-          ),
-        ],
-      ),
       body: SafeArea(
         child: Column(
-            children: <Widget>[
+          children: <Widget>[
             // Custom AppBar widget
             AppBar1(),
-        // YouTube Player widget
-        Container(
-          width: MediaQuery
-              .of(context)
-              .size
-              .width,
-          child: YoutubePlayer(
-            controller: _controller,
-            showVideoProgressIndicator: true,
-            progressIndicatorColor: Colors.amber,
-            progressColors: const ProgressBarColors(
-              playedColor: Colors.amber,
-              handleColor: Colors.amberAccent,
+            // YouTube Player widget
+            Container(
+              width: screenWidth,
+              height: screenHeight *0.4,
+              child: YoutubePlayer(
+                controller: _controller,
+                showVideoProgressIndicator: true,
+                progressIndicatorColor: Colors.amber,
+                progressColors: const ProgressBarColors(
+                  playedColor: Colors.amber,
+                  handleColor: Colors.amberAccent,
+                ),
+              ),
             ),
-          ),
-        ),
-        SizedBox(height: 15.0),
-        // Course list and Section list without gaps
-        Expanded(
-          child: _courses.isEmpty
-              ? Center(child: CircularProgressIndicator())
-              : ListView.builder(
-            itemCount: _courses.length,
-            itemBuilder: (context, index) {
-              final course = _courses[index];
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CourseList(
-                    selectedItem: _selectedItem,
-                    course: course,
-                    toggle: () {
-                      setState(() {
-                        _selectedCourseId = course.courseId;
-                        _toggleMenu();
-                      });
-                    },
-                    onEdit: () =>
-                        _editCourse(course.courseId!, course.courseName),
-                    onDelete: () => _deleteCourse(course.courseId!),
-                    onAddSection: () => _addSection(course.courseId!),
+            SizedBox(height: 15.0),
+            Padding(
+              padding: EdgeInsets.only(left: 30.0, right: 30.0,),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  TextButton(
+                      onPressed: (){
+                        setState(() {
+                          isLesson = false;
+                        });
+                      },
+                      child:Text('Overview')
                   ),
-                  if (_selectedCourseId == course.courseId)
-                    Column(
-                      children: _sectionsByCourseId[_selectedCourseId]?.map((
-                          section) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SectionList(
-                              animation: _animation,
-                              items: [section],
-                              selectedItem: _selectedItem,
-                              onSectionTap: (sectionName) {
-                                setState(() {
-                                  _selectedItem = sectionName;
-                                  url = section.sectionUrl ?? '';
-                                  _controller.load(
-                                      YoutubePlayer.convertUrlToId(url) ?? '');
-                                });
-                              },
-                              onEdit: () => _editSection(section.sectionId!,
-                                  section.sectionName ?? '',
-                                  section.sectionUrl ?? ''),
-                              onDelete: () =>
-                                  _deleteSection(section.sectionId!),
-                            ),
-                            SizedBox(height: 10.0),
-                          ],
-                        );
-                      }).toList() ?? [Center(child: Text(
-                          'No sections available'))
-                      ],
-                    ),
+                  TextButton(
+                      onPressed: (){
+                        setState(() {
+                          isLesson = true;
+                        });
+                      },
+                      child:Text('Lessons')
+                  ),
                 ],
-              );
-            },
-          ),
-        ),
-       ],
-    ),
-    ),
-
-    );
-  }
-}
-
-// CourseList widget
-class CourseList extends StatelessWidget {
-  final String? selectedItem;
-  final Courses course;
-  final VoidCallback toggle;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-  final VoidCallback onAddSection;
-
-  const CourseList({
-    Key? key,
-    required this.selectedItem,
-    required this.course,
-    required this.toggle,
-    required this.onEdit,
-    required this.onDelete,
-    required this.onAddSection,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: toggle,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
-        decoration: BoxDecoration(
-          color: Colors.grey[200],
-          borderRadius: BorderRadius.circular(12.0),
-          border: Border.all(color: Colors.deepPurpleAccent, width: 2),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text(
-              course.courseName,
-              style: TextStyle(color: Colors.deepPurple, fontSize: 16.0),
+              ),
             ),
-            Row(
-              children: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.edit),
-                  onPressed: onEdit,
+            if(!isLesson)
+              Expanded(
+                child: ListView(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(left: 30.0, right: 30.0,top: 10.0,bottom: 10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text('${widget.unit!.unitName}',
+                                style: GoogleFonts.nunito(
+                                    textStyle: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20.0
+                                    )
+                                ),
+                              ),
+                              Text('By MSM.Usama',
+                                style: GoogleFonts.nunito(
+                                    textStyle: TextStyle(
+                                        color: Colors.black26,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 10.0
+                                    )
+                                ),)
+                            ],),
+                          Text('RS: ${widget.unit!.payment}/-',
+                            style: GoogleFonts.nunito(
+                                textStyle: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: screenWidth*0.045
+                                )
+                            ),)
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(left: 15.0,right: 15.0),
+                      child: Text('${widget.unit!.overviewDescripton}',style: GoogleFonts.nunito(
+                          textStyle: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10.0
+                          )
+                      ),),
+                    ),
+                    SizedBox(height: 10.0,),
+                    Padding(
+                      padding: EdgeInsets.only(left: 30.0,right: 30.0,bottom: 50.0),
+                      child: TextButton(
+                        onPressed: (){},
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStatePropertyAll(Color(0xffF37979)),
+                        ),
+                        child: Text('Get Entroll',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: screenWidth *0.035
+                          ),),
+                      ),
+                    ),
+                  ],
                 ),
-                IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: onDelete,
+              ),
+
+            if(isLesson)
+            // Course list and Section list without gaps
+              Expanded(
+                child: _courses.isEmpty
+                    ? Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                  itemCount: _courses.where((course)=>course.unitId == widget.unit!.documentId).length,
+                  itemBuilder: (context, index) {
+                    final course = _courses.where((course)=>course.unitId == widget.unit!.documentId).toList()[index];
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CourseList(
+                          selectedItem: _selectedItem,
+                          course: course,
+                          toggle: () {
+                            setState(() {
+
+                              _selectedCourseId = course.courseId;
+                              _toggleMenu();
+                            });
+                          },
+                          onEdit: () =>
+                              _editCourse(course.courseId!, course.courseName),
+                          onDelete: () => _deleteCourse(course.courseId!),
+                          onAddSection: () => _addSection(course.courseId!),
+                        ),
+
+                        if (_selectedCourseId == course.courseId)
+                          Column(
+                            children: _sectionsByCourseId[_selectedCourseId]?.map((
+                                section) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SectionList(
+                                    animation: _animation,
+                                    items: [section],
+                                    selectedItem: _selectedItem,
+                                    onSectionTap: (sectionName) {
+                                      setState(() {
+                                        _selectedItem = sectionName;
+                                        url = section.sectionUrl ?? '';
+                                        _controller.load(
+                                            YoutubePlayer.convertUrlToId(url) ?? '');
+                                      });
+                                    },
+                                    onEdit: () => _editSection(section.sectionId!,
+                                        section.sectionName ?? '',
+                                        section.sectionUrl ?? ''),
+                                    onDelete: () =>
+                                        _deleteSection(section.sectionId!),
+                                  ),
+                                  SizedBox(height: 10.0),
+
+                                ],
+
+                              );
+                            }).toList() ?? [Center(child: Text(
+
+                                'No sections available'))
+
+                            ],
+                          ),
+                      ],
+                    );
+                  },
                 ),
-                IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: onAddSection,
+              ),
+            if(isLesson)
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Padding(
+                  padding: EdgeInsets.all(15.0),
+                  child: IconButton(
+                    style: ButtonStyle(
+                        backgroundColor: MaterialStatePropertyAll(Color(0xffF37979))
+                    ),
+                    icon: Icon(Icons.add),
+                    onPressed: _addCourse,
+                  ),
                 ),
-              ],
-            ),
+              ),
           ],
         ),
       ),
-    );
-  }
-}
 
-// SectionList widget
-class SectionList extends StatelessWidget {
-  final Animation<double> animation;
-  final List<Section> items;
-  final String? selectedItem;
-  final void Function(String?)? onSectionTap;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-
-  const SectionList({
-    Key? key,
-    required this.animation,
-    required this.items,
-    this.selectedItem,
-    this.onSectionTap,
-    required this.onEdit,
-    required this.onDelete,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SizeTransition(
-      sizeFactor: animation,
-      axisAlignment: -1.0,
-      child: Column(
-        children: items.map((section) {
-          final bool isSelected = selectedItem != null &&
-              selectedItem == section.sectionName;
-
-          return ListTile(
-            title: Row(
-              children: <Widget>[
-                Icon(
-                  isSelected ? Icons.stop_circle : Icons.play_circle,
-                  color: Color(0xffFF8A8A),
-                ),
-                SizedBox(width: 10.0),
-                Text(section.sectionName ?? 'No Name'),
-              ],
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.edit),
-                  onPressed: onEdit,
-                ),
-                IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: onDelete,
-                ),
-              ],
-            ),
-            onTap: () {
-              if (onSectionTap != null) {
-                onSectionTap!(section.sectionName);
-              }
-            },
-          );
-        }).toList(),
-      ),
     );
   }
 }

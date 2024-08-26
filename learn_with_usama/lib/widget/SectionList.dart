@@ -1,4 +1,7 @@
+// SectionList widget
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 import '../models/Section.dart';
 
 class SectionList extends StatelessWidget {
@@ -6,6 +9,8 @@ class SectionList extends StatelessWidget {
   final List<Section> items;
   final String? selectedItem;
   final void Function(String?)? onSectionTap;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   const SectionList({
     Key? key,
@@ -13,6 +18,8 @@ class SectionList extends StatelessWidget {
     required this.items,
     this.selectedItem,
     this.onSectionTap,
+    required this.onEdit,
+    required this.onDelete,
   }) : super(key: key);
 
   @override
@@ -22,7 +29,8 @@ class SectionList extends StatelessWidget {
       axisAlignment: -1.0,
       child: Column(
         children: items.map((section) {
-          final bool isSelected = selectedItem == section.sectionName;
+          final bool isSelected = selectedItem != null &&
+              selectedItem == section.sectionName;
 
           return ListTile(
             title: Row(
@@ -33,6 +41,19 @@ class SectionList extends StatelessWidget {
                 ),
                 SizedBox(width: 10.0),
                 Text(section.sectionName ?? 'No Name'),
+              ],
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                IconButton(
+                  icon: Icon(Icons.edit),
+                  onPressed: onEdit,
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: onDelete,
+                ),
               ],
             ),
             onTap: () {

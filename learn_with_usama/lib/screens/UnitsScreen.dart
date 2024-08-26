@@ -27,7 +27,7 @@ class Units extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => CourseScreen(course: courses,section: section,)),
+            MaterialPageRoute(builder: (context) => CourseScreen(course: courses,section: section,unit: unit,)),
           );
         },
         child: ListTile(

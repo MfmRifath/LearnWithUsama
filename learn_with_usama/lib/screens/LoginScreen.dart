@@ -37,6 +37,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       resizeToAvoidBottomInset: true, // Automatically adjusts for keyboard
       body: ModalProgressHUD(
@@ -49,36 +52,40 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               // Background Image
               Container(
+                height: screenHeight,
+                width: screenWidth,
                 decoration: const BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage('images/BackgroundLogin.png'),
-                    fit: BoxFit.fill,
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),
               // Color Overlay (Optional)
               Container(
+                height: screenHeight,
+                width: screenWidth,
                 color: Colors.black.withOpacity(0.1), // Adjust the opacity as needed
               ),
               // Content inside SingleChildScrollView to prevent overflow
               SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.07),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      SizedBox(height: 300.0),
+                      SizedBox(height: screenHeight * 0.35),
                       Text(
                         'Login',
                         style: GoogleFonts.nunito(
                           textStyle: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 35.0,
+                            fontSize: screenHeight * 0.045,
                             color: Colors.white,
                           ),
                         ),
                       ),
-                      SizedBox(height: 15.0),
+                      SizedBox(height: screenHeight * 0.02),
                       // Email TextField
                       TextField(
                         onChanged: (value) {
@@ -88,6 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           labelText: 'Email',
                           labelStyle: TextStyle(
                             color: Colors.white,
+                            fontSize: screenHeight * 0.02,
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -104,9 +112,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                         ),
-                        style: TextStyle(color: Colors.white), // Text color in TextField
+                        style: TextStyle(
+                          color: Colors.white, // Text color in TextField
+                          fontSize: screenHeight * 0.02,
+                        ),
                       ),
-                      SizedBox(height: 10.0),
+                      SizedBox(height: screenHeight * 0.015),
                       // Password TextField
                       TextField(
                         onChanged: (value) {
@@ -117,6 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           labelText: 'Password',
                           labelStyle: TextStyle(
                             color: Colors.white,
+                            fontSize: screenHeight * 0.02,
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -133,7 +145,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                         ),
-                        style: TextStyle(color: Colors.white), // Text color in TextField
+                        style: TextStyle(
+                          color: Colors.white, // Text color in TextField
+                          fontSize: screenHeight * 0.02,
+                        ),
                       ),
                       Align(
                         alignment: Alignment.centerLeft,
@@ -145,14 +160,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               textStyle: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 15.0,
+                                fontSize: screenHeight * 0.018,
                               ),
                             ),
                           ),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(top: 10.0),
+                        padding: EdgeInsets.only(top: screenHeight * 0.015),
                         child: Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
@@ -208,13 +223,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               style: GoogleFonts.lato(
                                 textStyle: TextStyle(
                                   color: Colors.white,
+                                  fontSize: screenHeight * 0.022,
                                 ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                      SizedBox(height: 50.0),
+                      SizedBox(height: screenHeight * 0.05),
                       Align(
                         alignment: Alignment.center,
                         child: Column(
@@ -223,6 +239,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               'Don\'t have an account?',
                               style: TextStyle(
                                 color: Colors.white,
+                                fontSize: screenHeight * 0.018,
                               ),
                             ),
                             TextButton(
@@ -239,7 +256,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   textStyle: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 15.0,
+                                    fontSize: screenHeight * 0.018,
                                   ),
                                 ),
                               ),

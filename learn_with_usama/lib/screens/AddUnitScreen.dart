@@ -13,7 +13,8 @@ class _AddUnitScreenState extends State<AddUnitScreen> {
   final _unitNameController = TextEditingController();
   final _unitNumberController = TextEditingController();
   final _docIdController = TextEditingController();
-
+final _paymnetController = TextEditingController();
+final _overviewDescriptionController = TextEditingController();
   bool _isSubmitting = false;
   String? _error;
 
@@ -59,6 +60,24 @@ class _AddUnitScreenState extends State<AddUnitScreen> {
               border: OutlineInputBorder(),
             ),
           ),
+          SizedBox(height: 16.0),
+          TextField(
+            controller: _paymnetController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: 'payment',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          SizedBox(height: 16.0),
+          TextField(
+            controller: _overviewDescriptionController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: 'overviewDescription',
+              border: OutlineInputBorder(),
+            ),
+          ),
           SizedBox(height: 20.0),
           if (_error != null)
             Text(
@@ -70,7 +89,7 @@ class _AddUnitScreenState extends State<AddUnitScreen> {
               ? CircularProgressIndicator()
               : ElevatedButton(
             onPressed: () {
-              addUnit(_unitNameController,_unitNumberController,_isSubmitting,_error,_docIdController as String);
+              addUnit(_unitNameController,_unitNumberController,_isSubmitting,_error,_docIdController as String,_paymnetController,_overviewDescriptionController);
               Navigator.of(context).pop();
             },
             child: Text('Add Unit'),

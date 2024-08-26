@@ -5,11 +5,12 @@ class Courses implements Unit {
   final String? courseId; // Make courseId an instance variable
   final String courseName;
   final String? unitId;
+  Unit? unit;
 
   Courses( {
     required this.courseId,
     required this.courseName,
-    this.unitId,
+    required this.unitId,
   });
 
   // Factory constructor to create a Courses from a Firestore document
@@ -18,6 +19,7 @@ class Courses implements Unit {
     return Courses(
       courseId: data['courseId'] as String?, // Use document ID for courseId
       courseName: data['courseName'] as String? ?? '',
+       unitId:  data['unitId'] as String?? '',
        // Extract unitId from the document data
     );
   }
@@ -26,7 +28,9 @@ class Courses implements Unit {
   // Method to convert a Courses to Firestore document data
   Map<String, dynamic> toMap() {
     return {
+      'courseId' :courseId,
       'courseName': courseName,
+      'unitId':unitId,
 
     };
   }
@@ -45,13 +49,21 @@ class Courses implements Unit {
 
   @override
   // TODO: implement documentId
-  String get documentId => throw UnimplementedError();
+  String get documentId => unitId!;
 
   @override
   // TODO: implement unitName
-  String? get unitName => throw UnimplementedError();
+  String? get unitName => unit!.unitName;
 
   @override
   // TODO: implement unitNumber
   String? get unitNumber => throw UnimplementedError();
+
+  @override
+  // TODO: implement payment
+  String? get payment => throw UnimplementedError();
+
+  @override
+  // TODO: implement overviewDescripton
+  String? get overviewDescripton => throw UnimplementedError();
 }

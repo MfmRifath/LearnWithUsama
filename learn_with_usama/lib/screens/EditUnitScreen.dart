@@ -19,13 +19,18 @@ class EditUnitScreen extends StatefulWidget {
 class _EditUnitScreenState extends State<EditUnitScreen> {
   final _unitNameController = TextEditingController();
   final _unitNumberController = TextEditingController();
-
+  final _docIdController = TextEditingController();
+  final _paymnetController = TextEditingController();
+  final _overviewDescriptionController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _unitNameController.text = widget.unit.unitName ?? '';
     _unitNumberController.text = widget.unit.unitNumber ?? '';
+    _docIdController.text =widget.unit.documentId ??'';
+    _paymnetController.text = widget.unit.payment ?? '';
+    _overviewDescriptionController.text =widget.unit.overviewDescripton ?? '';
   }
 
   @override
@@ -51,10 +56,37 @@ class _EditUnitScreenState extends State<EditUnitScreen> {
               border: OutlineInputBorder(),
             ),
           ),
+          SizedBox(height: 16.0),
+          TextField(
+            controller: _docIdController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: 'documentId',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          SizedBox(height: 16.0),
+          TextField(
+            controller: _paymnetController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: 'payment',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          SizedBox(height: 16.0),
+          TextField(
+            controller: _overviewDescriptionController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: 'overviewDescription',
+              border: OutlineInputBorder(),
+            ),
+          ),
           SizedBox(height: 20.0),
           ElevatedButton(
             onPressed: (){
-              editUnits(_unitNameController, _unitNumberController, context, widget.unit.documentId);
+              editUnits(_unitNameController, _unitNumberController, context, widget.unit.documentId, _paymnetController,_overviewDescriptionController,);
             },
             child: Text('Save Changes'),
           ),

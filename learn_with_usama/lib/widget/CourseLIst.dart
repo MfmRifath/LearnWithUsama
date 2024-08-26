@@ -1,33 +1,31 @@
+// CourseList widget
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 import '../models/Courses.dart';
 
-class CourseList extends StatefulWidget {
+class CourseList extends StatelessWidget {
   final String? selectedItem;
-  final String? selectedcourseId;
   final Courses course;
-  final void Function(String? courseId) onCourseTap;
+  final VoidCallback toggle;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+  final VoidCallback onAddSection;
 
-  CourseList({
+  const CourseList({
     Key? key,
     required this.selectedItem,
-    required this.onCourseTap,
     required this.course,
-    this.selectedcourseId,
+    required this.toggle,
+    required this.onEdit,
+    required this.onDelete,
+    required this.onAddSection,
   }) : super(key: key);
 
   @override
-  State<CourseList> createState() => _CourseListState();
-}
-
-class _CourseListState extends State<CourseList> {
-  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          widget.onCourseTap(widget.course.courseId);
-        });
-      },
+      onTap: toggle,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
         decoration: BoxDecoration(
@@ -39,8 +37,24 @@ class _CourseListState extends State<CourseList> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Text(
-              widget.course.courseName,
+              course.courseName,
               style: TextStyle(color: Colors.deepPurple, fontSize: 16.0),
+            ),
+            Row(
+              children: <Widget>[
+                IconButton(
+                  icon: Icon(Icons.edit),
+                  onPressed: onEdit,
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: onDelete,
+                ),
+                IconButton(
+                  icon: Icon(Icons.add),
+                  onPressed: onAddSection,
+                ),
+              ],
             ),
           ],
         ),

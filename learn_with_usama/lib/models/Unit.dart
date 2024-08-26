@@ -3,9 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
  class Unit  {
   final String? unitNumber;
   final String? unitName;
+  final String? payment;
+  final String? overviewDescripton;
   final String documentId; // Document ID for Firestore operations
 
-  Unit({
+  Unit({this.overviewDescripton, this.payment,
     required this.unitNumber,
     required this.unitName,
      required this.documentId,
@@ -17,6 +19,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
     return Unit(
       unitNumber: data['unitNumber'] as String?,
       unitName: data['unitName'] as String?,
+      payment: data['payment'] as String?,
+      overviewDescripton: data['overviewDescription'] as String?,
       documentId: doc.id,
     );
   }
@@ -26,6 +30,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
     return {
       'unitNumber': unitNumber,
       'unitName': unitName,
+      'payment' : payment,
+      'overviewDescription' : overviewDescripton
     };
   }
 

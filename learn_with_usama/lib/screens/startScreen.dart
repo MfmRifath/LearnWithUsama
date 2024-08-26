@@ -13,34 +13,37 @@ class StartScreen extends StatefulWidget {
 class _StartScreenState extends State<StartScreen> {
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).unfocus(); // Dismiss the keyboard when tapping outside
-        },
-        child: SafeArea(
+      body: SafeArea(
+        child: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).unfocus(); // Dismiss the keyboard when tapping outside
+          },
           child: SingleChildScrollView(
             child: Container(
-              height: MediaQuery.of(context).size.height, // Ensure the container fills the screen height
+              height: screenHeight, // Ensure the container fills the screen height
               decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('images/Background.png'),
-                  fit: BoxFit.fill,
+                  fit: BoxFit.cover,
                 ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  const SizedBox(height: 125.0),
+                  SizedBox(height: screenHeight * 0.15),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.07),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Container(
-                          height: 150.0,
-                          width: 150.0,
+                          height: screenHeight * 0.2,
+                          width: screenHeight * 0.2,
                           decoration: const BoxDecoration(
                             image: DecorationImage(
                               image: AssetImage('images/Usama.png'),
@@ -50,19 +53,19 @@ class _StartScreenState extends State<StartScreen> {
                         Text(
                           'LearnWithUsama',
                           style: GoogleFonts.nunito(
-                            textStyle: const TextStyle(
+                            textStyle: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.black54,
-                              fontSize: 25.0,
+                              fontSize: screenHeight * 0.03,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 5.0),
+                        SizedBox(height: screenHeight * 0.01),
                         Text(
                           'Combined',
                           style: GoogleFonts.nunito(
-                            textStyle: const TextStyle(
-                              fontSize: 20.0,
+                            textStyle: TextStyle(
+                              fontSize: screenHeight * 0.025,
                               color: Colors.black26,
                             ),
                           ),
@@ -70,18 +73,18 @@ class _StartScreenState extends State<StartScreen> {
                         Text(
                           'Mathematics',
                           style: GoogleFonts.nunito(
-                            textStyle: const TextStyle(
-                              fontSize: 20.0,
+                            textStyle: TextStyle(
+                              fontSize: screenHeight * 0.025,
                               color: Colors.black26,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 25.0),
+                        SizedBox(height: screenHeight * 0.03),
                         Row(
                           children: <Widget>[
                             Container(
-                              height: 75.0,
-                              width: 75.0,
+                              height: screenHeight * 0.1,
+                              width: screenHeight * 0.1,
                               decoration: const BoxDecoration(
                                 image: DecorationImage(
                                   image: AssetImage('images/s2oLogo.png'),
@@ -89,10 +92,10 @@ class _StartScreenState extends State<StartScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 20.0),
+                            SizedBox(width: screenWidth * 0.05),
                             Container(
-                              height: 75.0,
-                              width: 75.0,
+                              height: screenHeight * 0.1,
+                              width: screenHeight * 0.1,
                               decoration: const BoxDecoration(
                                 image: DecorationImage(
                                   image: AssetImage('images/s2oLogo.png'),
@@ -107,42 +110,46 @@ class _StartScreenState extends State<StartScreen> {
                   ),
                   const Spacer(),
                   Padding(
-                    padding: const EdgeInsets.only(right: 25.0),
+                    padding: EdgeInsets.only(right: screenWidth * 0.07),
                     child: Align(
                       alignment: Alignment.centerRight,
-                      child: TextButton(
-                        style: ButtonStyle(
-                          side: MaterialStateProperty.all(
-                            const BorderSide(
-                              color: Colors.white,
-                              width: 3.0,
+                      
+                      child: Padding(
+                        padding: EdgeInsets.only(bottom: 50.0),
+                        child: TextButton(
+                          style: ButtonStyle(
+                            side: MaterialStateProperty.all(
+                              const BorderSide(
+                                color: Colors.white,
+                                width: 3.0,
+                              ),
+                            ),
+                            shape: MaterialStateProperty.all(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
                             ),
                           ),
-                          shape: MaterialStateProperty.all(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => LoginScreen()),
-                          );
-                        },
-                        child: Text(
-                          'Get Started',
-                          style: GoogleFonts.lato(
-                            textStyle: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16.0,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) =>  LoginScreen()),
+                            );
+                          },
+                          child: Text(
+                            'Get Started',
+                            style: GoogleFonts.lato(
+                              textStyle: TextStyle(
+                                color: Colors.white,
+                                fontSize: screenHeight * 0.022,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 25.0),
+                  SizedBox(height: screenHeight * 0.03),
                 ],
               ),
             ),

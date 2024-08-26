@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:learn_with_usama/screens/TheoryScreen.dart';
 import 'package:learn_with_usama/widget/NavDrawer.dart';
 
+import '../widget/AppBar.dart';
 import '../widget/NotificationWidget.dart';
 
 class Home extends StatefulWidget {
@@ -23,7 +24,7 @@ class _HomeState extends State<Home> {
       body: SafeArea(
         child: ListView(
           children: <Widget>[
-            AppBar(),
+            AppBar1(),
             Image(image: AssetImage('images/big_usama.png')),
             Padding(
               padding: const EdgeInsets.all(8.0),

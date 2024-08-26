@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -14,6 +15,8 @@ class AppBar1 extends StatefulWidget {
 
 class _AppBar1State extends State<AppBar1> {
   OverlayEntry? _overlayEntry;
+  final _auth = FirebaseAuth.instance;;
+
 
   void _showNotification() {
     final overlay = Overlay.of(context);
@@ -33,17 +36,22 @@ class _AppBar1State extends State<AppBar1> {
       _overlayEntry?.remove();
     });
   }
+
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Container(
       color: Colors.white60,
+      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Builder(  // Use Builder here
+          Builder(
             builder: (context) => TextButton.icon(
               style: ButtonStyle(
-                  backgroundColor:
-                  MaterialStateProperty.all(Colors.white)),
+                backgroundColor: MaterialStateProperty.all(Colors.white),
+              ),
               onPressed: () {
                 // Open the drawer
                 Scaffold.of(context).openDrawer();
@@ -56,7 +64,7 @@ class _AppBar1State extends State<AppBar1> {
                 ),
               ),
               label: Text(
-                'Your Name',
+                '${_auth.currentUser?.email.toString()}',
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
@@ -64,14 +72,12 @@ class _AppBar1State extends State<AppBar1> {
               ),
             ),
           ),
-          SizedBox(
-            width: 150.0,
-          ),
-          IconButton(
-            color: Colors.pinkAccent,
-            onPressed: _showNotification,
-            icon: Icon(CupertinoIcons.bell),
-          ),
+          // Display notification icon only on larger screens
+            IconButton(
+              color: Colors.pinkAccent,
+              onPressed: _showNotification,
+              icon: Icon(CupertinoIcons.bell),
+            ),
         ],
       ),
     );
