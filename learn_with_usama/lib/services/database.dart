@@ -53,7 +53,7 @@ class Database with ChangeNotifier {
           sectionName: data['sectionName'] as String?,
           sectionUrl: data['sectionUrl'] as String,
           sectionDuration: data['sectionDuration'] as String?,
-          coursesId: data['coursesId'] as String?, // Ensure coursesId is part of the document
+          courseId: data['courseId'] as String?, // Ensure coursesId is part of the document
         );
       }).toList();
     }).handleError((error) {

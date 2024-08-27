@@ -12,7 +12,7 @@ import 'package:provider/provider.dart';
 import 'models/Courses.dart';
 import 'models/Section.dart';
 import 'models/Unit.dart';
-import 'screens/startScreen.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(

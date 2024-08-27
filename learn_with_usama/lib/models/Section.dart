@@ -4,20 +4,19 @@ import 'package:learn_with_usama/models/Unit.dart';
 
 import 'Courses.dart';
 
-class Section implements Courses {
+class Section  {
   final String? sectionId;
   final String sectionUrl;
   final String? sectionName;
   final String? sectionDuration;
-  final String? coursesId;
+  final String? courseId;
   Courses? courses;
 
-  Section({
+  Section({this.courseId,
     this.sectionId,
     required this.sectionUrl,
     this.sectionName,
     this.sectionDuration,
-    this.coursesId,
   });
 
   // Factory constructor to create a Section from a Firestore document
@@ -29,7 +28,7 @@ class Section implements Courses {
       sectionName: data['sectionName'] as String?,
       sectionUrl: data['sectionUrl'] as String,
       sectionDuration: data['sectionDuration'] as String?,
-      coursesId: data['coursesId'] as String?, // Ensure coursesId is part of the document
+      courseId: data['coursesId'] as String, // Ensure coursesId is part of the document
     );
   }
 
@@ -39,7 +38,8 @@ class Section implements Courses {
       'sectionName': sectionName,
       'sectionUrl': sectionUrl,
       'sectionDuration': sectionDuration,
-      'coursesId': coursesId, // Include coursesId when converting to map
+      'courseId': courseId,
+      'sectionId': sectionId,// Include coursesId when converting to map
     };
   }
 
@@ -57,40 +57,5 @@ class Section implements Courses {
     return sectionRef.delete();
   }
 
-  @override
-  String get courseId => coursesId ?? ''; // Implement courseId
-
-  @override
-  String get courseName => sectionName ?? ''; // Implement courseName
-
-  @override
-  String? get unitId => courses?.unitId;
-
-  @override
-  // TODO: implement documentId
-  String get documentId => throw UnimplementedError();
-
-  @override
-  // TODO: implement unitName
-  String? get unitName => throw UnimplementedError();
-
-  @override
-  // TODO: implement unitNumber
-  String? get unitNumber => throw UnimplementedError();
-
-  @override
-  Unit? unit;
-
-  @override
-  // TODO: implement payment
-  String? get payment => throw UnimplementedError();
-
-  @override
-  // TODO: implement overviewDescripton
-  String? get overviewDescription => throw UnimplementedError();
-
-  @override
-  // TODO: implement overviewDescripton
-  String? get overviewDescripton => throw UnimplementedError();
 
 }

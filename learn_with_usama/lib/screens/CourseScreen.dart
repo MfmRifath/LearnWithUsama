@@ -2,7 +2,6 @@ import 'dart:core';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:learn_with_usama/widget/AppBar.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../models/Section.dart';
 import '../models/Courses.dart';
@@ -11,6 +10,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/Unit.dart';
 import '../widget/CourseLIst.dart';
 import '../widget/SectionList.dart';
+import '../widget/AppBar.dart';
 
 class CourseScreen extends StatefulWidget {
   final List<Section> section;
@@ -38,9 +38,6 @@ class _CourseScreenState extends State<CourseScreen>
   late FirebaseFirestore _firestore;
   String url = '';
   String? _selectedCourseId;
-  List<Section> _sections = [];
-  List<Courses> _courses = [];
-  Map<String, List<Section>> _sectionsByCourseId = {};
   bool isLesson = false;
 
   @override
@@ -74,23 +71,6 @@ class _CourseScreenState extends State<CourseScreen>
     );
   }
 
-  Future<void> _showErrorDialog(String message) async {
-    await showDialog(
-      context: context,
-      builder: (context) =>
-          AlertDialog(
-            title: Text('Error'),
-            content: Text(message),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text('OK'),
-              ),
-            ],
-          ),
-    );
-  }
-
   @override
   void dispose() {
     _controller.dispose();
@@ -111,10 +91,7 @@ class _CourseScreenState extends State<CourseScreen>
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery
-        .of(context)
-        .size
-        .width;
+    double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       body: SafeArea(
@@ -162,7 +139,7 @@ class _CourseScreenState extends State<CourseScreen>
                             Row(
                               children: [
                                 Text(
-                                  '${widget.unit.unitName}',
+                                  widget.unit.unitName!,
                                   style: GoogleFonts.nunito(
                                     textStyle: TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -197,7 +174,7 @@ class _CourseScreenState extends State<CourseScreen>
                             Padding(
                               padding: EdgeInsets.all(10.0),
                               child: Text(
-                                '${widget.unit.overviewDescription}',
+                                widget.unit.overviewDescription!,
                                 style: GoogleFonts.nunito(
                                   textStyle: TextStyle(
                                     fontWeight: FontWeight.bold,
@@ -232,24 +209,16 @@ class _CourseScreenState extends State<CourseScreen>
                   ),
                 if (isLesson)
                   Expanded(
-                    child: ListView.builder(
+                    child: ListView(
                       padding: EdgeInsets.symmetric(
                           horizontal: 30.0, vertical: 10.0),
-                      itemCount: widget.course
-                          .where((course) =>
-                      course.unitId == widget.unit.unitNumber)
-                          .length,
-                      itemBuilder: (context, courseIndex) {
-                        final course = widget.course.where((course) =>
-                        course.unitId == widget.unit.unitNumber)
-                            .toList()[courseIndex];
+                      children: widget.course
+                          .where((course) => course.unitId == widget.unit.unitNumber)
+                          .map((course) {
                         final courseSections = widget.section.where((section) =>
-                        section.courseId == course.courseId)
-                            .toList();
+                        section.courseId == course.courseId).toList();
 
                         return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          // Allow the column to shrink-wrap its children
                           children: [
                             CourseList(
                               course: course,
@@ -258,46 +227,26 @@ class _CourseScreenState extends State<CourseScreen>
                                   _selectedCourseId = course.courseId;
                                   _toggleMenu();
                                 });
-                              },
+                              }, firestore: _firestore,
                             ),
                             if (_selectedCourseId == course.courseId)
-                              ListView.builder(
-                                shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
-                                itemCount: courseSections.length,
-                                itemBuilder: (context, sectionIndex) {
-                                  final section = courseSections[sectionIndex];
-                                  return SizeTransition(
-                                    sizeFactor: _animation,
-                                    axisAlignment: 0.0,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      // Allow the column to shrink-wrap its children
-                                      crossAxisAlignment: CrossAxisAlignment
-                                          .start,
-                                      children: [
-                                        SectionList(
-                                          animation: _animation,
-                                          items: courseSections,
-                                          selectedItem: _selectedItem,
-                                          onSectionTap: (sectionName) {
-                                            setState(() {
-                                              _selectedItem = sectionName;
-                                              url = section.sectionUrl ?? '';
-                                              _controller.load(
-                                                  YoutubePlayer.convertUrlToId(
-                                                      url) ?? '');
-                                            });
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
+                              SectionList(
+                                animation: _animation,
+                                items: courseSections,
+                                selectedItem: _selectedItem,
+                                onSectionTap: (sectionName) {
+                                  setState(() {
+                                    _selectedItem = sectionName;
+                                    url = courseSections.firstWhere((section) =>
+                                    section.sectionName == sectionName).sectionUrl ?? '';
+                                    _controller.load(
+                                        YoutubePlayer.convertUrlToId(url) ?? '');
+                                  });
+                                }, firestore: _firestore,
                               ),
                           ],
                         );
-                      },
+                      }).toList(),
                     ),
                   )
               ],

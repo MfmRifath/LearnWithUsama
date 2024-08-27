@@ -96,7 +96,7 @@ class _UnitsState extends State<Units> {
             TextButton(
               onPressed: () async {
                 try {
-                  await Unit.delete(widget.unit!.documentId);
+                  await Unit.delete(widget.unit.documentId);
                   Navigator.of(context).pop(); // Close the dialog
                 } catch (e) {
                   // Handle error gracefully
