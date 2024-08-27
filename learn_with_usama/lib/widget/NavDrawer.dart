@@ -8,6 +8,9 @@ class NavDrawer extends StatefulWidget {
 }
 
 class _NavDrawerState extends State<NavDrawer> {
+  Future<void> _signOut() async {
+    await FirebaseAuth.instance.signOut();
+  }
   @override
   Widget build(BuildContext context) {
     Future<void> signOut() async {
@@ -105,8 +108,8 @@ class _NavDrawerState extends State<NavDrawer> {
             title: Text('Logout'),
             onTap: () => {
               setState(() {
-            signOut();
-            Navigator.pushNamed(context, LoginScreen.id);
+           signOut();
+           Navigator.pushNamed(context, '/');
               }),
 
             },

@@ -65,5 +65,5 @@ class Courses implements Unit {
 
   @override
   // TODO: implement overviewDescripton
-  String? get overviewDescripton => throw UnimplementedError();
+  String? get overviewDescription => throw UnimplementedError();
 }

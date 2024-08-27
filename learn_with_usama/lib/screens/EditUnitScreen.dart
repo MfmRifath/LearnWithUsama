@@ -30,7 +30,7 @@ class _EditUnitScreenState extends State<EditUnitScreen> {
     _unitNumberController.text = widget.unit.unitNumber ?? '';
     _docIdController.text =widget.unit.documentId ??'';
     _paymnetController.text = widget.unit.payment ?? '';
-    _overviewDescriptionController.text =widget.unit.overviewDescripton ?? '';
+    _overviewDescriptionController.text =widget.unit.overviewDescription ?? '';
   }
 
   @override

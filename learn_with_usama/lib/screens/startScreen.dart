@@ -131,10 +131,8 @@ class _StartScreenState extends State<StartScreen> {
                             ),
                           ),
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) =>  LoginScreen()),
-                            );
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=> LoginScreen()));
+
                           },
                           child: Text(
                             'Get Started',

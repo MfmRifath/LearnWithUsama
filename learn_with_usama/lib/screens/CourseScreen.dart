@@ -13,14 +13,15 @@ import '../widget/CourseLIst.dart';
 import '../widget/SectionList.dart';
 
 class CourseScreen extends StatefulWidget {
-  final Section? section;
-  final Courses? course;
-  final Unit? unit;
+  final List<Section> section;
+  final List<Courses> course;
+  final Unit unit;
 
   const CourseScreen({
     Key? key,
-    this.section,
-    this.course, this.unit,
+    required this.section,
+    required this.course,
+    required this.unit,
   }) : super(key: key);
 
   @override
@@ -35,21 +36,24 @@ class _CourseScreenState extends State<CourseScreen>
   String? _selectedItem;
   bool _isMenuOpen = false;
   late FirebaseFirestore _firestore;
-  late String url;
+  String url = '';
   String? _selectedCourseId;
   List<Section> _sections = [];
   List<Courses> _courses = [];
   Map<String, List<Section>> _sectionsByCourseId = {};
   bool isLesson = false;
+
   @override
   void initState() {
     super.initState();
     _firestore = FirebaseFirestore.instance;
 
-    // Initialize YouTube player with the section's URL if available
-    url = widget.section?.sectionUrl ?? '';
-    String? videoId = YoutubePlayer.convertUrlToId(url);
+    _initializeYoutubePlayer();
+    _initializeAnimationController();
+  }
 
+  void _initializeYoutubePlayer() {
+    String? videoId = YoutubePlayer.convertUrlToId(url);
     _controller = YoutubePlayerController(
       initialVideoId: videoId ?? '',
       flags: const YoutubePlayerFlags(
@@ -57,244 +61,34 @@ class _CourseScreenState extends State<CourseScreen>
         mute: false,
       ),
     );
+  }
 
-    // Initialize the animation controller
+  void _initializeAnimationController() {
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-
     _animation = CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
     );
-
-    // Fetch all courses and sections
-    _fetchCourses();
-    _fetchSections();
   }
 
-  Future<void> _fetchCourses() async {
-    try {
-      final snapshot = await _firestore.collection('courses').orderBy(
-          'courseId').get();
-      final courses = snapshot.docs.map((doc) => Courses.fromFirestore(doc))
-          .toList();
-      setState(() {
-        _courses = courses;
-      });
-    } catch (e) {
-      print('Error fetching courses: $e');
-    }
-  }
-
-  Future<void> _fetchSections() async {
-    try {
-      final snapshot = await _firestore.collection('section').orderBy(
-          'sectionId').get();
-      final sections = snapshot.docs.map((doc) => Section.fromFirestore(doc))
-          .toList();
-      setState(() {
-        _sections = sections;
-        _sectionsByCourseId = {};
-        for (var section in sections) {
-          final courseId = section.coursesId;
-          if (courseId != null) {
-            if (_sectionsByCourseId.containsKey(courseId)) {
-              _sectionsByCourseId[courseId]!.add(section);
-            } else {
-              _sectionsByCourseId[courseId] = [section];
-            }
-          }
-        }
-      });
-    } catch (e) {
-      print('Error fetching sections: $e');
-    }
-  }
-
-  Future<void> _addCourse() async {
-    final courseNameController = TextEditingController();
+  Future<void> _showErrorDialog(String message) async {
     await showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Add Course'),
-          content: TextField(
-            controller: courseNameController,
-            decoration: InputDecoration(labelText: 'Course Name'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                final courseName = courseNameController.text;
-                if (courseName.isNotEmpty) {
-                  await _firestore.collection('courses').add({
-                    'courseName': courseName,
-                    'courseId': DateTime
-                        .now()
-                        .millisecondsSinceEpoch
-                        .toString(),
-                  });
-                  _fetchCourses();
-                }
-              },
-              child: Text('Add'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _addSection(String courseId) async {
-    final sectionNameController = TextEditingController();
-    final sectionUrlController = TextEditingController();
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Add Section'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: sectionNameController,
-                decoration: InputDecoration(labelText: 'Section Name'),
-              ),
-              TextField(
-                controller: sectionUrlController,
-                decoration: InputDecoration(labelText: 'Section URL'),
+      builder: (context) =>
+          AlertDialog(
+            title: Text('Error'),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('OK'),
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                final sectionName = sectionNameController.text;
-                final sectionUrl = sectionUrlController.text;
-                if (sectionName.isNotEmpty && sectionUrl.isNotEmpty) {
-                  await _firestore.collection('section').add({
-                    'sectionName': sectionName,
-                    'sectionUrl': sectionUrl,
-                    'coursesId': courseId,
-                    'sectionId': DateTime
-                        .now()
-                        .millisecondsSinceEpoch
-                        .toString(),
-                  });
-                  _fetchSections();
-                }
-              },
-              child: Text('Add'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
-            ),
-          ],
-        );
-      },
     );
-  }
-
-  Future<void> _editCourse(String courseId, String currentName) async {
-    final courseNameController = TextEditingController(text: currentName);
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Edit Course'),
-          content: TextField(
-            controller: courseNameController,
-            decoration: InputDecoration(labelText: 'Course Name'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                final courseName = courseNameController.text;
-                if (courseName.isNotEmpty) {
-                  await _firestore.collection('courses').doc(courseId).update({
-                    'courseName': courseName,
-                  });
-                  _fetchCourses();
-                }
-              },
-              child: Text('Update'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _editSection(String sectionId, String currentName,
-      String currentUrl) async {
-    final sectionNameController = TextEditingController(text: currentName);
-    final sectionUrlController = TextEditingController(text: currentUrl);
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Edit Section'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: sectionNameController,
-                decoration: InputDecoration(labelText: 'Section Name'),
-              ),
-              TextField(
-                controller: sectionUrlController,
-                decoration: InputDecoration(labelText: 'Section URL'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                final sectionName = sectionNameController.text;
-                final sectionUrl = sectionUrlController.text;
-                if (sectionName.isNotEmpty && sectionUrl.isNotEmpty) {
-                  await _firestore.collection('section').doc(sectionId).update({
-                    'sectionName': sectionName,
-                    'sectionUrl': sectionUrl,
-                  });
-                  _fetchSections();
-                }
-              },
-              child: Text('Update'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _deleteCourse(String courseId) async {
-    await _firestore.collection('courses').doc(courseId).delete();
-    _fetchCourses();
-  }
-
-  Future<void> _deleteSection(String sectionId) async {
-    await _firestore.collection('section').doc(sectionId).delete();
-    _fetchSections();
   }
 
   @override
@@ -317,209 +111,200 @@ class _CourseScreenState extends State<CourseScreen>
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
 
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            // Custom AppBar widget
-            AppBar1(),
-            // YouTube Player widget
-            Container(
-              width: screenWidth,
-              height: screenHeight *0.4,
-              child: YoutubePlayer(
-                controller: _controller,
-                showVideoProgressIndicator: true,
-                progressIndicatorColor: Colors.amber,
-                progressColors: const ProgressBarColors(
-                  playedColor: Colors.amber,
-                  handleColor: Colors.amberAccent,
+        child: YoutubePlayerBuilder(
+          player: YoutubePlayer(controller: _controller),
+          builder: (BuildContext, player) {
+            return Column(
+              children: [
+                AppBar1(page: '/theoryScreen'),
+                player,
+                SizedBox(height: 15.0),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 30.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            isLesson = false;
+                          });
+                        },
+                        child: Text('Overview'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            isLesson = true;
+                          });
+                        },
+                        child: Text('Lessons'),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ),
-            SizedBox(height: 15.0),
-            Padding(
-              padding: EdgeInsets.only(left: 30.0, right: 30.0,),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  TextButton(
-                      onPressed: (){
-                        setState(() {
-                          isLesson = false;
-                        });
-                      },
-                      child:Text('Overview')
-                  ),
-                  TextButton(
-                      onPressed: (){
-                        setState(() {
-                          isLesson = true;
-                        });
-                      },
-                      child:Text('Lessons')
-                  ),
-                ],
-              ),
-            ),
-            if(!isLesson)
-              Expanded(
-                child: ListView(
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.only(left: 30.0, right: 30.0,top: 10.0,bottom: 10.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text('${widget.unit!.unitName}',
-                                style: GoogleFonts.nunito(
+                if (!isLesson)
+                  Expanded(
+                    child: ListView(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 30.0, vertical: 10.0),
+                      children: <Widget>[
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Row(
+                              children: [
+                                Text(
+                                  '${widget.unit.unitName}',
+                                  style: GoogleFonts.nunito(
                                     textStyle: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20.0
-                                    )
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20.0,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Text(
+                                  'By MSM.Usama',
+                                  style: GoogleFonts.nunito(
+                                    textStyle: TextStyle(
+                                      color: Colors.black26,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 10.0,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 5.0),
+                            Text(
+                              'RS: ${widget.unit.payment}/-',
+                              style: GoogleFonts.nunito(
+                                textStyle: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: screenWidth * 0.045,
                                 ),
                               ),
-                              Text('By MSM.Usama',
+                            ),
+                            SizedBox(height: 10.0),
+                            Padding(
+                              padding: EdgeInsets.all(10.0),
+                              child: Text(
+                                '${widget.unit.overviewDescription}',
                                 style: GoogleFonts.nunito(
-                                    textStyle: TextStyle(
-                                        color: Colors.black26,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 10.0
-                                    )
-                                ),)
-                            ],),
-                          Text('RS: ${widget.unit!.payment}/-',
-                            style: GoogleFonts.nunito(
-                                textStyle: TextStyle(
+                                  textStyle: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: screenWidth*0.045
-                                )
-                            ),)
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(left: 15.0,right: 15.0),
-                      child: Text('${widget.unit!.overviewDescripton}',style: GoogleFonts.nunito(
-                          textStyle: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 10.0
-                          )
-                      ),),
-                    ),
-                    SizedBox(height: 10.0,),
-                    Padding(
-                      padding: EdgeInsets.only(left: 30.0,right: 30.0,bottom: 50.0),
-                      child: TextButton(
-                        onPressed: (){},
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStatePropertyAll(Color(0xffF37979)),
-                        ),
-                        child: Text('Get Entroll',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: screenWidth *0.035
-                          ),),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-            if(isLesson)
-            // Course list and Section list without gaps
-              Expanded(
-                child: _courses.isEmpty
-                    ? Center(child: CircularProgressIndicator())
-                    : ListView.builder(
-                  itemCount: _courses.where((course)=>course.unitId == widget.unit!.documentId).length,
-                  itemBuilder: (context, index) {
-                    final course = _courses.where((course)=>course.unitId == widget.unit!.documentId).toList()[index];
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CourseList(
-                          selectedItem: _selectedItem,
-                          course: course,
-                          toggle: () {
-                            setState(() {
-
-                              _selectedCourseId = course.courseId;
-                              _toggleMenu();
-                            });
-                          },
-                          onEdit: () =>
-                              _editCourse(course.courseId!, course.courseName),
-                          onDelete: () => _deleteCourse(course.courseId!),
-                          onAddSection: () => _addSection(course.courseId!),
-                        ),
-
-                        if (_selectedCourseId == course.courseId)
-                          Column(
-                            children: _sectionsByCourseId[_selectedCourseId]?.map((
-                                section) {
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SectionList(
-                                    animation: _animation,
-                                    items: [section],
-                                    selectedItem: _selectedItem,
-                                    onSectionTap: (sectionName) {
-                                      setState(() {
-                                        _selectedItem = sectionName;
-                                        url = section.sectionUrl ?? '';
-                                        _controller.load(
-                                            YoutubePlayer.convertUrlToId(url) ?? '');
-                                      });
-                                    },
-                                    onEdit: () => _editSection(section.sectionId!,
-                                        section.sectionName ?? '',
-                                        section.sectionUrl ?? ''),
-                                    onDelete: () =>
-                                        _deleteSection(section.sectionId!),
+                                    fontSize: 10.0,
                                   ),
-                                  SizedBox(height: 10.0),
-
-                                ],
-
-                              );
-                            }).toList() ?? [Center(child: Text(
-
-                                'No sections available'))
-
-                            ],
-                          ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 10.0),
+                            Align(
+                              alignment: Alignment.center,
+                              child: TextButton(
+                                onPressed: () {},
+                                style: ButtonStyle(
+                                  backgroundColor: MaterialStatePropertyAll(
+                                      Color(0xffF37979)),
+                                ),
+                                child: Text(
+                                  'Get Enroll',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: screenWidth * 0.035,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
-                    );
-                  },
-                ),
-              ),
-            if(isLesson)
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Padding(
-                  padding: EdgeInsets.all(15.0),
-                  child: IconButton(
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStatePropertyAll(Color(0xffF37979))
                     ),
-                    icon: Icon(Icons.add),
-                    onPressed: _addCourse,
                   ),
-                ),
-              ),
-          ],
+                if (isLesson)
+                  Expanded(
+                    child: ListView.builder(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 30.0, vertical: 10.0),
+                      itemCount: widget.course
+                          .where((course) =>
+                      course.unitId == widget.unit.unitNumber)
+                          .length,
+                      itemBuilder: (context, courseIndex) {
+                        final course = widget.course.where((course) =>
+                        course.unitId == widget.unit.unitNumber)
+                            .toList()[courseIndex];
+                        final courseSections = widget.section.where((section) =>
+                        section.courseId == course.courseId)
+                            .toList();
+
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          // Allow the column to shrink-wrap its children
+                          children: [
+                            CourseList(
+                              course: course,
+                              toggle: () {
+                                setState(() {
+                                  _selectedCourseId = course.courseId;
+                                  _toggleMenu();
+                                });
+                              },
+                            ),
+                            if (_selectedCourseId == course.courseId)
+                              ListView.builder(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                itemCount: courseSections.length,
+                                itemBuilder: (context, sectionIndex) {
+                                  final section = courseSections[sectionIndex];
+                                  return SizeTransition(
+                                    sizeFactor: _animation,
+                                    axisAlignment: 0.0,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      // Allow the column to shrink-wrap its children
+                                      crossAxisAlignment: CrossAxisAlignment
+                                          .start,
+                                      children: [
+                                        SectionList(
+                                          animation: _animation,
+                                          items: courseSections,
+                                          selectedItem: _selectedItem,
+                                          onSectionTap: (sectionName) {
+                                            setState(() {
+                                              _selectedItem = sectionName;
+                                              url = section.sectionUrl ?? '';
+                                              _controller.load(
+                                                  YoutubePlayer.convertUrlToId(
+                                                      url) ?? '');
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                  )
+              ],
+            );
+          },
         ),
       ),
-
     );
   }
 }

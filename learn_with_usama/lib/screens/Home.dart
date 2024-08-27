@@ -1,14 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:learn_with_usama/screens/LoginScreen.dart';
 import 'package:learn_with_usama/screens/TheoryScreen.dart';
 import 'package:learn_with_usama/widget/NavDrawer.dart';
 
 import '../widget/AppBar.dart';
-import '../widget/NotificationWidget.dart';
+
 
 class Home extends StatefulWidget {
-  static const String id = 'Home';
+static const String id = 'Home';
   @override
   _HomeState createState() => _HomeState();
 }
@@ -24,7 +25,7 @@ class _HomeState extends State<Home> {
       body: SafeArea(
         child: ListView(
           children: <Widget>[
-            AppBar1(),
+            AppBar1(page: '',),
             Image(image: AssetImage('images/big_usama.png')),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -43,7 +44,8 @@ class _HomeState extends State<Home> {
                     shape: MaterialStateProperty.all(RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20.0)))),
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => Theoryscreen()));
+                  Navigator.pushNamed(context, '/theoryScreen');
+
                 },
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

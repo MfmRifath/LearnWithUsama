@@ -23,7 +23,7 @@ String? _error, String docId , TextEditingController _paymentController, TextEdi
   }
 
   try {
-    final addedUnit = Unit(unitNumber: unitNumber, unitName: unitName, documentId: docId,payment: updatedPayment,overviewDescripton: updatedOverviewDescription);
+    final addedUnit = Unit(unitNumber: unitNumber, unitName: unitName, documentId: docId,payment: updatedPayment,overviewDescription: updatedOverviewDescription);
     await _firestore.collection('units').add(addedUnit.toMap());
 
      // Close the dialog
@@ -43,7 +43,7 @@ void editUnits(TextEditingController _unitNameController,TextEditingController _
   final updatedOverviewDescription = _overviewDescriptionController.text;
 
   // Get a reference to the Firestore document
-  final updatedUnit = Unit(unitNumber: updatedUnitNumber, unitName: updatedUnitName, documentId: documentId,payment: updatedPayment,overviewDescripton: updatedOverviewDescription);
+  final updatedUnit = Unit(unitNumber: updatedUnitNumber, unitName: updatedUnitName, documentId: documentId,payment: updatedPayment,overviewDescription: updatedOverviewDescription);
 
 
   final unitRef = _firestore.collection('units').doc(documentId);

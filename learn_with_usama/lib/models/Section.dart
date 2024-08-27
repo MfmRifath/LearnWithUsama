@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:learn_with_usama/models/Unit.dart';
 
 import 'Courses.dart';
@@ -12,7 +13,7 @@ class Section implements Courses {
   Courses? courses;
 
   Section({
-     this.sectionId,
+    this.sectionId,
     required this.sectionUrl,
     this.sectionName,
     this.sectionDuration,
@@ -23,7 +24,8 @@ class Section implements Courses {
   factory Section.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return Section(
-      sectionId: data['sectionId'] as String?, // Use the document ID for sectionId
+      sectionId: data['sectionId'] as String?,
+      // Use the document ID for sectionId
       sectionName: data['sectionName'] as String?,
       sectionUrl: data['sectionUrl'] as String,
       sectionDuration: data['sectionDuration'] as String?,
@@ -43,13 +45,15 @@ class Section implements Courses {
 
   // Method to update the Section in Firestore
   Future<void> update() {
-    final sectionRef = FirebaseFirestore.instance.collection('section').doc(sectionId);
+    final sectionRef = FirebaseFirestore.instance.collection('section').doc(
+        sectionId);
     return sectionRef.update(toMap());
   }
 
   // Static method to delete a Section from Firestore
   static Future<void> delete(String sectionId) {
-    final sectionRef = FirebaseFirestore.instance.collection('section').doc(sectionId);
+    final sectionRef = FirebaseFirestore.instance.collection('section').doc(
+        sectionId);
     return sectionRef.delete();
   }
 
@@ -60,7 +64,7 @@ class Section implements Courses {
   String get courseName => sectionName ?? ''; // Implement courseName
 
   @override
-  String? get unitId => courses?.unitId ;
+  String? get unitId => courses?.unitId;
 
   @override
   // TODO: implement documentId
@@ -83,5 +87,10 @@ class Section implements Courses {
 
   @override
   // TODO: implement overviewDescripton
-  String? get overviewDescripton => throw UnimplementedError(); // Implement unitId, using sectionId as unitId
+  String? get overviewDescription => throw UnimplementedError();
+
+  @override
+  // TODO: implement overviewDescripton
+  String? get overviewDescripton => throw UnimplementedError();
+
 }

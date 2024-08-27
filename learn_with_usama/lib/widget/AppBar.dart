@@ -1,13 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import 'NotificationWidget.dart';
 
 class AppBar1 extends StatefulWidget {
-  const AppBar1({
-    super.key,
-  });
+  String page;
+  AppBar1({required this.page});
 
   @override
   State<AppBar1> createState() => _AppBar1State();
@@ -15,8 +15,7 @@ class AppBar1 extends StatefulWidget {
 
 class _AppBar1State extends State<AppBar1> {
   OverlayEntry? _overlayEntry;
-  final _auth = FirebaseAuth.instance;;
-
+  final _auth = FirebaseAuth.instance;
 
   void _showNotification() {
     final overlay = Overlay.of(context);
@@ -43,10 +42,16 @@ class _AppBar1State extends State<AppBar1> {
 
     return Container(
       color: Colors.white60,
-      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-      child: Row(
+       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
+          IconButton(onPressed:(){
+            if(widget.page == ''){
+              Navigator.pop(context);
+            } else{
+              Navigator.pushNamed(context, widget.page);
+            }
+            }, icon: Icon(CupertinoIcons.back)),
           Builder(
             builder: (context) => TextButton.icon(
               style: ButtonStyle(
@@ -82,4 +87,6 @@ class _AppBar1State extends State<AppBar1> {
       ),
     );
   }
+
+
 }

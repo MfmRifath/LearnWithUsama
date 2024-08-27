@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
  class Unit  {
   final String? unitNumber;
   final String? unitName;
   final String? payment;
-  final String? overviewDescripton;
+  final String? overviewDescription;
   final String documentId; // Document ID for Firestore operations
 
-  Unit({this.overviewDescripton, this.payment,
+  Unit({this.overviewDescription, this.payment,
     required this.unitNumber,
     required this.unitName,
      required this.documentId,
@@ -20,7 +21,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
       unitNumber: data['unitNumber'] as String?,
       unitName: data['unitName'] as String?,
       payment: data['payment'] as String?,
-      overviewDescripton: data['overviewDescription'] as String?,
+      overviewDescription: data['overviewDescription'] as String?,
       documentId: doc.id,
     );
   }
@@ -31,7 +32,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
       'unitNumber': unitNumber,
       'unitName': unitName,
       'payment' : payment,
-      'overviewDescription' : overviewDescripton
+      'overviewDescription' : overviewDescription
     };
   }
 

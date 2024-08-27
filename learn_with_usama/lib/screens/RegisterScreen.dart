@@ -7,7 +7,7 @@ import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'LoginScreen.dart';
 
 class RegisterScreen extends StatefulWidget {
-  static const String id = 'RegisterScreen';
+
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -199,10 +199,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           TextButton(
                             onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => LoginScreen()),
-                              );
+                              Navigator.push(context, MaterialPageRoute(builder: (context)=> LoginScreen()));
+
                             },
                             child: Text(
                               'Login',

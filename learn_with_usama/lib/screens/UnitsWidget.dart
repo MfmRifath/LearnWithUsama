@@ -1,45 +1,48 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:learn_with_usama/models/Courses.dart';
 import 'package:learn_with_usama/models/Section.dart';
 import 'package:learn_with_usama/screens/CourseScreen.dart';
+import 'package:learn_with_usama/models/Unit.dart';
+import '../screens/AddUnitScreen.dart';
+import '../screens/EditUnitScreen.dart';
+Unit selectedUnit =new Unit(unitNumber: '', unitName: '', documentId: '');
 
-import '../models/Unit.dart';
-import 'AddUnitScreen.dart';
-import 'EditUnitScreen.dart';
-
-class Units extends StatelessWidget {
-  const Units({  this.unit,  this.courses, this.section});
-  final Unit? unit;
+class Units extends StatefulWidget {
+  const Units({required this.unit, this.courses, this.section});
+  final Unit unit;
   final Courses? courses;
   final Section? section;
 
   @override
+  State<Units> createState() => _UnitsState();
+}
+
+class _UnitsState extends State<Units> {
+
+  @override
   Widget build(BuildContext context) {
+
     return Padding(
       padding: EdgeInsets.all(3.0),
       child: TextButton(
-
         style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.all(Color(0xffFF8A8A)),
+          backgroundColor: MaterialStateProperty.all(Color(0xffFF8A8A)),
         ),
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => CourseScreen(course: courses,section: section,unit: unit,)),
+          selectedUnit = widget.unit;
+          Navigator.pushNamed(context,'/courseScreen'
           );
         },
         child: ListTile(
           contentPadding: EdgeInsets.all(10.0),
           leading: Image.asset(
-            'images/${unit!.unitName}.jpg', // Adjust file extension if needed
+            'images/${widget.unit.unitName}.jpg', // Adjust file extension if needed
             width: 50.0,
             height: 50.0,
             fit: BoxFit.cover,
           ),
           title: Text(
-            '${unit!.unitNumber}. ${unit!.unitName}',
+            '${widget.unit.unitNumber}. ${widget.unit.unitName}',
             style: TextStyle(
               color: Colors.black,
               fontSize: 16.0,
@@ -52,14 +55,12 @@ class Units extends StatelessWidget {
               IconButton(
                 icon: Icon(Icons.edit),
                 onPressed: () {
-                  // Handle edit action
                   _showEditDialog(context);
                 },
               ),
               IconButton(
                 icon: Icon(Icons.delete),
                 onPressed: () {
-                  // Handle delete action
                   _showDeleteDialog(context);
                 },
               ),
@@ -77,7 +78,7 @@ class Units extends StatelessWidget {
         return AlertDialog(
           title: Text('Edit Unit'),
           content: EditUnitScreen(
-            unit: unit!,
+            unit: widget.unit!,
           ),
         );
       },
@@ -95,11 +96,13 @@ class Units extends StatelessWidget {
             TextButton(
               onPressed: () async {
                 try {
-                  await Unit.delete(unit!.documentId);
+                  await Unit.delete(widget.unit!.documentId);
                   Navigator.of(context).pop(); // Close the dialog
                 } catch (e) {
-                  // Handle error here
-                  print('Error deleting unit: $e');
+                  // Handle error gracefully
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error deleting unit: $e')),
+                  );
                 }
               },
               child: Text('Delete'),
@@ -116,6 +119,7 @@ class Units extends StatelessWidget {
     );
   }
 }
+
 class AddUnitDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

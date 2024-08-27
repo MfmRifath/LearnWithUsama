@@ -9,10 +9,11 @@ import 'package:learn_with_usama/widget/NavDrawer.dart';
 
 import '../models/Unit.dart';
 
-import 'UnitsScreen.dart';
-
+import 'UnitsWidget.dart';
 class Theoryscreen extends StatefulWidget {
-  const Theoryscreen({Key? key}) : super(key: key);
+  late List <Unit> unit;
+
+   Theoryscreen({required this.unit});
 
   @override
   State<Theoryscreen> createState() => _TheoryscreenState();
@@ -20,7 +21,7 @@ class Theoryscreen extends StatefulWidget {
 
 class _TheoryscreenState extends State<Theoryscreen> {
   late final FirebaseFirestore firestore_;
-  late Unit unit;
+
 
 
   @override
@@ -40,7 +41,7 @@ class _TheoryscreenState extends State<Theoryscreen> {
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            AppBar1(),
+            AppBar1(page: '',),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
@@ -80,28 +81,15 @@ class _TheoryscreenState extends State<Theoryscreen> {
               ),
             ),
             Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: firestore_.collection('units').orderBy('unitNumber').snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-                    final units = snapshot.data!.docs.map((doc) => Unit.fromFirestore(doc)).toList();
-
-
-                    return ListView.builder(
+              child: ListView.builder(
                       padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
-                      itemCount: units.length,
-                      itemBuilder: (context, index) => Units(unit: units[index],),
-                    );
-                  } else {
-                    return Center(child: Text('No data available'));
-                  }
-                },
+                      itemCount: widget.unit.length,
+                      itemBuilder: (context, index) => Units(unit: widget.unit[index]),
+                    )
+
+
               ),
-            ),
+
             Align(
               alignment: Alignment.bottomRight,
               child: Padding(

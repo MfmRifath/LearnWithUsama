@@ -195,8 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     email: email,
                                     password: password,
                                   );
-                                  Navigator.pushNamed(context, Home.id);
-                                } on FirebaseAuthException catch (e) {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context)=> Home()));                                } on FirebaseAuthException catch (e) {
                                   if (e.code == 'user-not-found') {
                                     showErrorDialog('No user found for that email.');
                                   } else if (e.code == 'wrong-password') {
@@ -244,10 +243,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             TextButton(
                               onPressed: () {
-                                Navigator.push(
+                                Navigator.pushNamed(
                                   context,
-                                  MaterialPageRoute(
-                                      builder: (context) => RegisterScreen()),
+                                  '/registration',
                                 );
                               },
                               child: Text(

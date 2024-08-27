@@ -1,4 +1,3 @@
-// SectionList widget
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -9,8 +8,7 @@ class SectionList extends StatelessWidget {
   final List<Section> items;
   final String? selectedItem;
   final void Function(String?)? onSectionTap;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
+
 
   const SectionList({
     Key? key,
@@ -18,8 +16,7 @@ class SectionList extends StatelessWidget {
     required this.items,
     this.selectedItem,
     this.onSectionTap,
-    required this.onEdit,
-    required this.onDelete,
+
   }) : super(key: key);
 
   @override
@@ -33,34 +30,21 @@ class SectionList extends StatelessWidget {
               selectedItem == section.sectionName;
 
           return ListTile(
-            title: Row(
-              children: <Widget>[
-                Icon(
-                  isSelected ? Icons.stop_circle : Icons.play_circle,
-                  color: Color(0xffFF8A8A),
-                ),
-                SizedBox(width: 10.0),
-                Text(section.sectionName ?? 'No Name'),
-              ],
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+            leading: Icon(
+              isSelected ? Icons.stop_circle : Icons.play_circle,
+              color: Color(0xffFF8A8A),
             ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.edit),
-                  onPressed: onEdit,
-                ),
-                IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: onDelete,
-                ),
-              ],
-            ),
+            title: Text(section.sectionName ?? 'No Name'),
             onTap: () {
               if (onSectionTap != null) {
                 onSectionTap!(section.sectionName);
               }
             },
+            tileColor: isSelected ? Colors.grey[200] : null,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
           );
         }).toList(),
       ),
