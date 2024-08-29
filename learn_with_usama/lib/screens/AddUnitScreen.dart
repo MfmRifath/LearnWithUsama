@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:learn_with_usama/models/Unit.dart';
+import 'package:learn_with_usama/services/database.dart';
 
-import '../services/UnitServises.dart';
 
 class AddUnitScreen extends StatefulWidget {
   @override
@@ -10,11 +11,10 @@ class AddUnitScreen extends StatefulWidget {
 }
 
 class _AddUnitScreenState extends State<AddUnitScreen> {
-  final _unitNameController = TextEditingController();
-  final _unitNumberController = TextEditingController();
-  final _docIdController = TextEditingController();
-final _paymnetController = TextEditingController();
-final _overviewDescriptionController = TextEditingController();
+  String unitName = '';
+  String unitNumber = '';
+  String payment = '';
+  String overviewDescription ='';
   bool _isSubmitting = false;
   String? _error;
 
@@ -36,7 +36,9 @@ final _overviewDescriptionController = TextEditingController();
           ),
           SizedBox(height: 16.0),
           TextField(
-            controller: _unitNameController,
+            onChanged: (value){
+              unitName = value;
+            },
             decoration: InputDecoration(
               labelText: 'Unit Name',
               border: OutlineInputBorder(),
@@ -44,7 +46,9 @@ final _overviewDescriptionController = TextEditingController();
           ),
           SizedBox(height: 16.0),
           TextField(
-            controller: _unitNumberController,
+            onChanged: (value){
+              unitNumber = value;
+            },
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
               labelText: 'Unit Number',
@@ -53,16 +57,9 @@ final _overviewDescriptionController = TextEditingController();
           ),
           SizedBox(height: 16.0),
           TextField(
-            controller: _docIdController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: 'documentId',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          SizedBox(height: 16.0),
-          TextField(
-            controller: _paymnetController,
+            onChanged: (value){
+              payment = value;
+            },
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
               labelText: 'payment',
@@ -71,7 +68,9 @@ final _overviewDescriptionController = TextEditingController();
           ),
           SizedBox(height: 16.0),
           TextField(
-            controller: _overviewDescriptionController,
+            onChanged: (value){
+              overviewDescription =value;
+            },
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
               labelText: 'overviewDescription',
@@ -89,7 +88,7 @@ final _overviewDescriptionController = TextEditingController();
               ? CircularProgressIndicator()
               : ElevatedButton(
             onPressed: () {
-              addUnit(_unitNameController,_unitNumberController,_isSubmitting,_error,_docIdController as String,_paymnetController,_overviewDescriptionController);
+              Database().addUnit(Unit(unitName: unitName,unitNumber: unitNumber, payment: payment,overviewDescription: overviewDescription));
               Navigator.of(context).pop();
             },
             child: Text('Add Unit'),

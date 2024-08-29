@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:learn_with_usama/models/Courses.dart';
+import 'package:learn_with_usama/services/database.dart';
 
 import '../models/Section.dart';
+import '../screens/EditSectionScreen.dart';
 import '../services/Course&SectionSevices.dart';
 
 class SectionList extends StatefulWidget {
@@ -62,7 +65,7 @@ class _SectionListState extends State<SectionList> {
                   icon: Icon(Icons.add),
                   onPressed: () {
                     setState(() {
-                      showAddSectionDialog(section.courseId!, context, widget.firestore);
+                      showAddSectionDialog(section.courseId!, context);
                     });
 
                   },
@@ -71,17 +74,16 @@ class _SectionListState extends State<SectionList> {
                   icon: Icon(Icons.edit),
                   onPressed: () {
                     setState(() {
-                       showEditSectionDialog(section, context, widget.firestore);
+                    _showEditDialog(context, section);
                     });
                     },
                 ),
                 IconButton(
                   icon: Icon(Icons.delete),
                   onPressed: () {
-                    setState(()  {
-                       deleteSection(section, widget.firestore, context);
+                    setState(() {
+                       showDeleteSectionDialog(context,section.sectionDoc!);
                     });
-
                     },
                 ),
               ],
@@ -92,4 +94,53 @@ class _SectionListState extends State<SectionList> {
     );
   }
 }
+void _showEditDialog(BuildContext context,Section section) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Edit Unit'),
+        content: EditSectionScreen(
+          section: section,
+        ),
+      );
+    },
+  );
+}
 
+void showDeleteSectionDialog(BuildContext context, String sectionId) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Delete Course'),
+        content: Text('Are you sure you want to delete this course?'),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              try {
+                await Database().deleteSection(sectionId) ;
+                Navigator.of(context).pop(); // Close the dialog
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Course deleted successfully')),
+                );
+              } catch (e) {
+                // Handle error gracefully
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error deleting course: $e')),
+                );
+              }
+            },
+            child: Text('Delete'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+            },
+            child: Text('Cancel'),
+          ),
+        ],
+      );
+    },
+  );
+}

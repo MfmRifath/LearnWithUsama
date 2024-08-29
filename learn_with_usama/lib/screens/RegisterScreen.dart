@@ -166,7 +166,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               setState(() {
                                 showSpinner = false;
                               });
-                              Navigator.pushNamed(context, LoginScreen.id);
+                              Navigator.pushNamed(context, '/login/');
                             } catch (e) {
                               if (kDebugMode) {
                                 print(e);

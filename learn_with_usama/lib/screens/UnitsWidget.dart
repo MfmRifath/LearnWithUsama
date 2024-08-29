@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:learn_with_usama/models/Courses.dart';
 import 'package:learn_with_usama/models/Section.dart';
-import 'package:learn_with_usama/screens/CourseScreen.dart';
+
 import 'package:learn_with_usama/models/Unit.dart';
+import 'package:learn_with_usama/services/database.dart';
 import '../screens/AddUnitScreen.dart';
 import '../screens/EditUnitScreen.dart';
-Unit selectedUnit =new Unit(unitNumber: '', unitName: '', documentId: '');
+Unit selectedUnit =Unit();
 
 class Units extends StatefulWidget {
-  const Units({required this.unit, this.courses, this.section});
-  final Unit unit;
+  const Units({super.key, required this.unit, this.courses, this.section});
+  final Unit? unit;
   final Courses? courses;
   final Section? section;
 
@@ -29,20 +30,20 @@ class _UnitsState extends State<Units> {
           backgroundColor: MaterialStateProperty.all(Color(0xffFF8A8A)),
         ),
         onPressed: () {
-          selectedUnit = widget.unit;
+          selectedUnit = widget.unit!;
           Navigator.pushNamed(context,'/courseScreen'
           );
         },
         child: ListTile(
           contentPadding: EdgeInsets.all(10.0),
           leading: Image.asset(
-            'images/${widget.unit.unitName}.jpg', // Adjust file extension if needed
+            'images/${widget.unit!.unitName}.jpg', // Adjust file extension if needed
             width: 50.0,
             height: 50.0,
             fit: BoxFit.cover,
           ),
           title: Text(
-            '${widget.unit.unitNumber}. ${widget.unit.unitName}',
+            '${widget.unit!.unitNumber}. ${widget.unit!.unitName}',
             style: TextStyle(
               color: Colors.black,
               fontSize: 16.0,
@@ -96,7 +97,7 @@ class _UnitsState extends State<Units> {
             TextButton(
               onPressed: () async {
                 try {
-                  await Unit.delete(widget.unit.documentId);
+                  await Database().deleteUnit(widget.unit!.documentId);
                   Navigator.of(context).pop(); // Close the dialog
                 } catch (e) {
                   // Handle error gracefully
@@ -121,6 +122,8 @@ class _UnitsState extends State<Units> {
 }
 
 class AddUnitDialog extends StatelessWidget {
+  const AddUnitDialog({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Dialog(

@@ -1,39 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:learn_with_usama/models/Courses.dart';
+import '../models/Section.dart';
 import '../models/Unit.dart';
 import '../services/database.dart';
 
-class EditUnitScreen extends StatefulWidget {
-  final Unit unit;
+class EditCourseScreen extends StatefulWidget {
+  final Courses course;
 
-  const EditUnitScreen({Key? key, required this.unit}) : super(key: key);
+  const EditCourseScreen({Key? key, required this.course}) : super(key: key);
 
   @override
-  _EditUnitScreenState createState() => _EditUnitScreenState();
+  _EditCourseScreenState createState() => _EditCourseScreenState();
 }
 
-class _EditUnitScreenState extends State<EditUnitScreen> {
+class _EditCourseScreenState extends State<EditCourseScreen> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _unitNameController;
-  late TextEditingController _unitNumberController;
-  late TextEditingController _paymentController;
-  late TextEditingController _overviewDescriptionController;
+  late TextEditingController _courseNameController;
+  late TextEditingController _courseIdController;
+  late TextEditingController _unitIdController;
+  late TextEditingController _courseDocController;
+
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _unitNameController = TextEditingController(text: widget.unit.unitName);
-    _unitNumberController = TextEditingController(text: widget.unit.unitNumber);
-    _paymentController = TextEditingController(text: widget.unit.payment);
-    _overviewDescriptionController = TextEditingController(text: widget.unit.overviewDescription);
+    _courseNameController = TextEditingController(text: widget.course.courseName);
+    _courseIdController = TextEditingController(text: widget.course.courseId);
+    _unitIdController =TextEditingController(text: widget.course.unitId);
+    _courseDocController =TextEditingController(text: widget.course.courseDoc);
   }
 
   @override
   void dispose() {
-    _unitNameController.dispose();
-    _unitNumberController.dispose();
-    _paymentController.dispose();
-    _overviewDescriptionController.dispose();
+    _courseNameController.dispose();
+    _courseIdController.dispose();
+    _unitIdController.dispose();
     super.dispose();
   }
 
@@ -43,23 +45,25 @@ class _EditUnitScreenState extends State<EditUnitScreen> {
         _isLoading = true;
       });
 
-      Unit updatedUnit = Unit(
-        documentId: widget.unit.documentId,
-        unitName: _unitNameController.text.trim(),
-        unitNumber: _unitNumberController.text.trim(),
-        payment: _paymentController.text.trim(),
-        overviewDescription: _overviewDescriptionController.text.trim(),
+      Courses updatedCourse = Courses(
+        courseDoc: _courseDocController.text.trim(),
+        courseId: _courseIdController.text.trim(),
+        courseName: _courseNameController.text.trim(),
+        unitId: _unitIdController.text.trim(),
       );
 
+      print("Updating course: ${updatedCourse.courseName}, ${updatedCourse.courseId}, ${updatedCourse.unitId}");
+
       try {
-        await Database().updateUnit(updatedUnit);
+        await Database().updateCourse(updatedCourse, context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Unit updated successfully')),
+          SnackBar(content: Text('Course updated successfully')),
         );
         Navigator.of(context).pop();
       } catch (e) {
+        print("Failed to update course: $e");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update unit: $e')),
+          SnackBar(content: Text('Failed to update Course: $e')),
         );
       } finally {
         setState(() {
@@ -73,7 +77,7 @@ class _EditUnitScreenState extends State<EditUnitScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Unit'),
+        title: Text('Edit Course'),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
@@ -84,62 +88,44 @@ class _EditUnitScreenState extends State<EditUnitScreen> {
             child: Column(
               children: [
                 TextFormField(
-                  controller: _unitNameController,
+                  controller: _courseNameController,
                   decoration: InputDecoration(
-                    labelText: 'Unit Name',
+                    labelText: 'Course Name',
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a unit name';
+                      return 'Please enter a course name';
                     }
                     return null;
                   },
                 ),
                 SizedBox(height: 16.0),
                 TextFormField(
-                  controller: _unitNumberController,
+                  controller: _courseIdController,
                   decoration: InputDecoration(
-                    labelText: 'Unit Number',
+                    labelText: 'Course Id',
                     border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a unit number';
+                      return 'Please enter a course Id';
                     }
                     return null;
                   },
                 ),
                 SizedBox(height: 16.0),
                 TextFormField(
-                  controller: _paymentController,
+                  controller: _unitIdController,
                   decoration: InputDecoration(
-                    labelText: 'Payment',
+                    labelText: 'Unit Id',
                     border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a payment amount';
-                    }
-                    if (double.tryParse(value.trim()) == null) {
-                      return 'Please enter a valid number';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 16.0),
-                TextFormField(
-                  controller: _overviewDescriptionController,
-                  decoration: InputDecoration(
-                    labelText: 'Overview Description',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 5,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter an overview description';
+                      return 'Please enter a Unit Id';
                     }
                     return null;
                   },

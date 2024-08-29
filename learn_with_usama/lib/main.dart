@@ -38,11 +38,11 @@ class learnWithUsama extends StatelessWidget {
           initialData: [],
         ),
         StreamProvider<List<Courses>>.value(
-          value: Database().Course,
+          value: Database().courses,
           initialData: [],
         ),
         StreamProvider<List<Section>>.value(
-          value: Database().section,
+          value: Database().sections,
           initialData: [],
         ),
       ],

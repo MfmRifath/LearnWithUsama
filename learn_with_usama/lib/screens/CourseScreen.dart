@@ -35,7 +35,6 @@ class _CourseScreenState extends State<CourseScreen>
   late Animation<double> _animation;
   String? _selectedItem;
   bool _isMenuOpen = false;
-  late FirebaseFirestore _firestore;
   String url = '';
   String? _selectedCourseId;
   bool isLesson = false;
@@ -43,16 +42,13 @@ class _CourseScreenState extends State<CourseScreen>
   @override
   void initState() {
     super.initState();
-    _firestore = FirebaseFirestore.instance;
-
     _initializeYoutubePlayer();
     _initializeAnimationController();
   }
 
   void _initializeYoutubePlayer() {
-    String? videoId = YoutubePlayer.convertUrlToId(url);
     _controller = YoutubePlayerController(
-      initialVideoId: videoId ?? '',
+      initialVideoId: '',
       flags: const YoutubePlayerFlags(
         autoPlay: false,
         mute: false,
@@ -89,6 +85,17 @@ class _CourseScreenState extends State<CourseScreen>
     });
   }
 
+  void _onSectionTap(String sectionName, String sectionUrl) {
+    setState(() {
+      _selectedItem = sectionName;
+      url = sectionUrl;
+      String? videoId = YoutubePlayer.convertUrlToId(url);
+      if (videoId != null) {
+        _controller.load(videoId);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -109,150 +116,146 @@ class _CourseScreenState extends State<CourseScreen>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       TextButton(
-                        onPressed: () {
-                          setState(() {
-                            isLesson = false;
-                          });
-                        },
+                        onPressed: () => setState(() => isLesson = false),
                         child: Text('Overview'),
                       ),
                       TextButton(
-                        onPressed: () {
-                          setState(() {
-                            isLesson = true;
-                          });
-                        },
+                        onPressed: () => setState(() => isLesson = true),
                         child: Text('Lessons'),
                       ),
                     ],
                   ),
                 ),
                 if (!isLesson)
-                  Expanded(
-                    child: ListView(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 30.0, vertical: 10.0),
-                      children: <Widget>[
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Row(
-                              children: [
-                                Text(
-                                  widget.unit.unitName!,
-                                  style: GoogleFonts.nunito(
-                                    textStyle: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20.0,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                Text(
-                                  'By MSM.Usama',
-                                  style: GoogleFonts.nunito(
-                                    textStyle: TextStyle(
-                                      color: Colors.black26,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 10.0,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 5.0),
-                            Text(
-                              'RS: ${widget.unit.payment}/-',
-                              style: GoogleFonts.nunito(
-                                textStyle: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: screenWidth * 0.045,
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 10.0),
-                            Padding(
-                              padding: EdgeInsets.all(10.0),
-                              child: Text(
-                                widget.unit.overviewDescription!,
-                                style: GoogleFonts.nunito(
-                                  textStyle: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 10.0,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 10.0),
-                            Align(
-                              alignment: Alignment.center,
-                              child: TextButton(
-                                onPressed: () {},
-                                style: ButtonStyle(
-                                  backgroundColor: MaterialStatePropertyAll(
-                                      Color(0xffF37979)),
-                                ),
-                                child: Text(
-                                  'Get Enroll',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: screenWidth * 0.035,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                if (isLesson)
-                  Expanded(
-                    child: ListView(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 30.0, vertical: 10.0),
-                      children: widget.course
-                          .where((course) => course.unitId == widget.unit.unitNumber)
-                          .map((course) {
-                        final courseSections = widget.section.where((section) =>
-                        section.courseId == course.courseId).toList();
-
-                        return Column(
-                          children: [
-                            CourseList(
-                              course: course,
-                              toggle: () {
-                                setState(() {
-                                  _selectedCourseId = course.courseId;
-                                  _toggleMenu();
-                                });
-                              }, firestore: _firestore,
-                            ),
-                            if (_selectedCourseId == course.courseId)
-                              SectionList(
-                                animation: _animation,
-                                items: courseSections,
-                                selectedItem: _selectedItem,
-                                onSectionTap: (sectionName) {
-                                  setState(() {
-                                    _selectedItem = sectionName;
-                                    url = courseSections.firstWhere((section) =>
-                                    section.sectionName == sectionName).sectionUrl ?? '';
-                                    _controller.load(
-                                        YoutubePlayer.convertUrlToId(url) ?? '');
-                                  });
-                                }, firestore: _firestore,
-                              ),
-                          ],
-                        );
-                      }).toList(),
-                    ),
-                  )
+                  _buildOverview(screenWidth)
+                else
+                  _buildLessonList(),
               ],
             );
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildOverview(double screenWidth) {
+    return Expanded(
+      child: ListView(
+        padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+        children: <Widget>[
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Row(
+                children: [
+                  Text(
+                    widget.unit.unitName!,
+                    style: GoogleFonts.nunito(
+                      textStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    'By MSM.Usama',
+                    style: GoogleFonts.nunito(
+                      textStyle: TextStyle(
+                        color: Colors.black26,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10.0,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 5.0),
+              Text(
+                'RS: ${widget.unit.payment}/-',
+                style: GoogleFonts.nunito(
+                  textStyle: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: screenWidth * 0.045,
+                  ),
+                ),
+              ),
+              SizedBox(height: 10.0),
+              Padding(
+                padding: EdgeInsets.all(10.0),
+                child: Text(
+                  widget.unit.overviewDescription!,
+                  style: GoogleFonts.nunito(
+                    textStyle: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 10.0,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 10.0),
+              Align(
+                alignment: Alignment.center,
+                child: TextButton(
+                  onPressed: () {},
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStatePropertyAll(Color(0xffF37979)),
+                  ),
+                  child: Text(
+                    'Get Enroll',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: screenWidth * 0.035,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLessonList() {
+    return Expanded(
+      child: ListView(
+        padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+        children: widget.course
+            .where((course) => course.unitId == widget.unit.unitNumber)
+            .map((course) {
+          final courseSections = widget.section
+              .where((section) => section.courseId == course.courseId)
+              .toList();
+
+          return Column(
+            children: [
+              CourseList(
+                course: course,
+                toggle: () {
+                  setState(() {
+                    _selectedCourseId = course.courseId;
+                    _toggleMenu();
+                  });
+                },
+              ),
+              if (_selectedCourseId == course.courseId)
+                SectionList(
+                  animation: _animation,
+                  items: courseSections,
+                  selectedItem: _selectedItem,
+                  onSectionTap: (sectionName) {
+                    _onSectionTap(
+                      sectionName!,
+                      courseSections.firstWhere((section) =>
+                      section.sectionName == sectionName).sectionUrl ?? '',
+                    );
+                  }, firestore: FirebaseFirestore.instance,
+                ),
+            ],
+          );
+        }).toList(),
       ),
     );
   }

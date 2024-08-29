@@ -1,39 +1,43 @@
 import 'package:flutter/material.dart';
+import '../models/Section.dart';
 import '../models/Unit.dart';
 import '../services/database.dart';
 
-class EditUnitScreen extends StatefulWidget {
-  final Unit unit;
+class EditSectionScreen extends StatefulWidget {
+  final Section section;
 
-  const EditUnitScreen({Key? key, required this.unit}) : super(key: key);
+  const EditSectionScreen({Key? key, required this.section}) : super(key: key);
 
   @override
-  _EditUnitScreenState createState() => _EditUnitScreenState();
+  _EditSectionScreenState createState() => _EditSectionScreenState();
 }
 
-class _EditUnitScreenState extends State<EditUnitScreen> {
+class _EditSectionScreenState extends State<EditSectionScreen> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _unitNameController;
-  late TextEditingController _unitNumberController;
-  late TextEditingController _paymentController;
-  late TextEditingController _overviewDescriptionController;
+  late TextEditingController _sectionNameController;
+  late TextEditingController _sectionIdController;
+  late TextEditingController _sectionUrlController;
+  late TextEditingController _sectionDurationController;
+  late TextEditingController _courseIdController;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _unitNameController = TextEditingController(text: widget.unit.unitName);
-    _unitNumberController = TextEditingController(text: widget.unit.unitNumber);
-    _paymentController = TextEditingController(text: widget.unit.payment);
-    _overviewDescriptionController = TextEditingController(text: widget.unit.overviewDescription);
+    _sectionNameController = TextEditingController(text: widget.section.sectionName);
+    _sectionIdController = TextEditingController(text: widget.section.sectionId);
+    _sectionUrlController = TextEditingController(text: widget.section.sectionUrl);
+    _sectionDurationController = TextEditingController(text: widget.section.sectionDuration);
+    _courseIdController =TextEditingController(text: widget.section.courseId);
   }
 
   @override
   void dispose() {
-    _unitNameController.dispose();
-    _unitNumberController.dispose();
-    _paymentController.dispose();
-    _overviewDescriptionController.dispose();
+    _sectionNameController.dispose();
+    _sectionIdController.dispose();
+    _sectionUrlController.dispose();
+    _sectionDurationController.dispose();
+    _courseIdController.dispose();
     super.dispose();
   }
 
@@ -43,23 +47,24 @@ class _EditUnitScreenState extends State<EditUnitScreen> {
         _isLoading = true;
       });
 
-      Unit updatedUnit = Unit(
-        documentId: widget.unit.documentId,
-        unitName: _unitNameController.text.trim(),
-        unitNumber: _unitNumberController.text.trim(),
-        payment: _paymentController.text.trim(),
-        overviewDescription: _overviewDescriptionController.text.trim(),
+      Section updatedSection = Section(
+        sectionDoc: widget.section.sectionDoc,
+        sectionName: _sectionNameController.text.trim(),
+        sectionId: _sectionIdController.text.trim(),
+        sectionDuration: _sectionDurationController.text.trim(),
+        sectionUrl: _sectionUrlController.text.trim(),
+        courseId: _courseIdController.text.trim(),
       );
 
       try {
-        await Database().updateUnit(updatedUnit);
+        await Database().updateSection(updatedSection);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Unit updated successfully')),
+          SnackBar(content: Text('Section updated successfully')),
         );
         Navigator.of(context).pop();
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update unit: $e')),
+          SnackBar(content: Text('Failed to update Section: $e')),
         );
       } finally {
         setState(() {
@@ -73,7 +78,7 @@ class _EditUnitScreenState extends State<EditUnitScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Unit'),
+        title: Text('Edit Section'),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
@@ -84,62 +89,61 @@ class _EditUnitScreenState extends State<EditUnitScreen> {
             child: Column(
               children: [
                 TextFormField(
-                  controller: _unitNameController,
+                  controller: _sectionNameController,
                   decoration: InputDecoration(
-                    labelText: 'Unit Name',
+                    labelText: 'Section Name',
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a unit name';
+                      return 'Please enter a section name';
                     }
                     return null;
                   },
                 ),
                 SizedBox(height: 16.0),
                 TextFormField(
-                  controller: _unitNumberController,
+                  controller: _sectionIdController,
                   decoration: InputDecoration(
-                    labelText: 'Unit Number',
+                    labelText: 'Section Id',
                     border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a unit number';
+                      return 'Please enter a section Id';
                     }
                     return null;
                   },
                 ),
                 SizedBox(height: 16.0),
                 TextFormField(
-                  controller: _paymentController,
+                  controller: _sectionDurationController,
                   decoration: InputDecoration(
-                    labelText: 'Payment',
+                    labelText: 'Section Duration',
                     border: OutlineInputBorder(),
                   ),
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a payment amount';
+                      return 'Please enter a Section Duration';
                     }
                     if (double.tryParse(value.trim()) == null) {
-                      return 'Please enter a valid number';
+                      return 'Please enter a Duration';
                     }
                     return null;
                   },
                 ),
                 SizedBox(height: 16.0),
                 TextFormField(
-                  controller: _overviewDescriptionController,
+                  controller: _sectionUrlController,
                   decoration: InputDecoration(
-                    labelText: 'Overview Description',
+                    labelText: 'Section URL',
                     border: OutlineInputBorder(),
                   ),
                   maxLines: 5,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter an overview description';
+                      return 'Please enter an Section URL';
                     }
                     return null;
                   },
