@@ -40,7 +40,7 @@ class _TheoryscreenState extends State<Theoryscreen> {
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            AppBar1(page: '',),
+            AppBar1(page: '/home',),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(

@@ -1,14 +1,12 @@
 import 'dart:core';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../models/Section.dart';
 import '../models/Courses.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../models/Unit.dart';
-import '../widget/CourseLIst.dart';
+import '../widget/CourseList.dart';
 import '../widget/SectionList.dart';
 import '../widget/AppBar.dart';
 
@@ -28,8 +26,7 @@ class CourseScreen extends StatefulWidget {
   State<CourseScreen> createState() => _CourseScreenState();
 }
 
-class _CourseScreenState extends State<CourseScreen>
-    with SingleTickerProviderStateMixin {
+class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMixin{
   late YoutubePlayerController _controller;
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -55,6 +52,7 @@ class _CourseScreenState extends State<CourseScreen>
       ),
     );
   }
+
 
   void _initializeAnimationController() {
     _animationController = AnimationController(
@@ -96,43 +94,73 @@ class _CourseScreenState extends State<CourseScreen>
     });
   }
 
+
+  Future<bool> _onWillPop() async {
+    if (_animationController.isAnimating) {
+      // If the animation is running, prevent back navigation
+      _animationController.reverse(); // Reverse the animation before allowing navigation
+      return false;
+    }
+
+    // If animation is not running, show the back dialog
+    final shouldPop = await _showBackDialog(context);
+    return shouldPop ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-      body: SafeArea(
-        child: YoutubePlayerBuilder(
-          player: YoutubePlayer(controller: _controller),
-          builder: (BuildContext, player) {
-            return Column(
-              children: [
-                AppBar1(page: '/theoryScreen'),
-                player,
-                SizedBox(height: 15.0),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 30.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      TextButton(
-                        onPressed: () => setState(() => isLesson = false),
-                        child: Text('Overview'),
-                      ),
-                      TextButton(
-                        onPressed: () => setState(() => isLesson = true),
-                        child: Text('Lessons'),
-                      ),
-                    ],
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        body: SafeArea(
+          child: YoutubePlayerBuilder(
+            player: YoutubePlayer(controller: _controller),
+            builder: (context, player) {
+              return Column(
+                children: [
+                  AppBar1(page: '/theoryScreen'),
+                  player,
+                  SizedBox(height: 15.0),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 30.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: <Widget>[
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: !isLesson ? Colors.white : Colors.black, backgroundColor: !isLesson ? Color(0xffF37979) : Colors.transparent,
+                            padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          onPressed: () => setState(() => isLesson = false),
+                          child: Text('Overview'),
+                        ),
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: isLesson ? Colors.white : Colors.black, backgroundColor: isLesson ? Color(0xffF37979) : Colors.transparent,
+                            padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          onPressed: () => setState(() => isLesson = true),
+                          child: Text('Lessons'),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                if (!isLesson)
-                  _buildOverview(screenWidth)
-                else
-                  _buildLessonList(),
-              ],
-            );
-          },
+                  if (!isLesson)
+                    _buildOverview(screenWidth)
+                  else
+                    _buildLessonList(),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -251,7 +279,8 @@ class _CourseScreenState extends State<CourseScreen>
                       courseSections.firstWhere((section) =>
                       section.sectionName == sectionName).sectionUrl ?? '',
                     );
-                  }, firestore: FirebaseFirestore.instance,
+                  },
+                  firestore: FirebaseFirestore.instance,
                 ),
             ],
           );
@@ -259,4 +288,30 @@ class _CourseScreenState extends State<CourseScreen>
       ),
     );
   }
+}
+
+Future<bool?> _showBackDialog(BuildContext context) {
+  return showDialog<bool>(
+    context: context,
+    barrierDismissible: false, // Prevent dismissing the dialog by tapping outside
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Are you sure?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false); // Return false to indicate not to pop
+            },
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/theoryScreen'); // Return true to indicate to pop
+            },
+            child: Text('Yes'),
+          ),
+        ],
+      );
+    },
+  );
 }

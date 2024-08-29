@@ -48,7 +48,15 @@ class _SectionListState extends State<SectionList> {
               isSelected ? Icons.stop_circle : Icons.play_circle,
               color: Color(0xffFF8A8A),
             ),
-            title: Text(section.sectionName ?? 'No Name'),
+            title: Column(
+              children: [
+                Text('${section.sectionId}. ${section.sectionName}' ?? 'No Name'),
+                Text('Duration: ${section.sectionDuration}',
+                  style: TextStyle(
+                      fontSize: 10.0,
+                  color: Colors.grey),)
+              ],
+            ),
             onTap: () {
               if (widget.onSectionTap != null) {
                 widget.onSectionTap!(section.sectionName);
