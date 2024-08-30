@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/animation.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../models/Section.dart';
 import '../screens/EditSectionScreen.dart';
 import '../services/Course&SectionSevices.dart';
@@ -48,13 +46,19 @@ class _SectionListState extends State<SectionList> {
             contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
             leading: Icon(
               isSelected ? Icons.stop_circle : Icons.play_circle,
-              color: Color(0xffFF8A8A),
+              color: isSelected ? Color(0xffF37979) : Colors.grey,
             ),
             title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${section.sectionId}. ${section.sectionName}' ?? 'No Name'),
                 Text(
-                  'Duration: ${section.sectionDuration}',
+                  '${section.sectionId}. ${section.sectionName}',
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+                Text(
+                  'Duration: ${section.sectionDuration} Minutes',
                   style: TextStyle(
                     fontSize: 10.0,
                     color: Colors.grey,
@@ -67,7 +71,7 @@ class _SectionListState extends State<SectionList> {
                 widget.onSectionTap!(section.sectionName);
               }
             },
-            tileColor: isSelected ? Colors.grey[200] : null,
+            tileColor: isSelected ? Color(0xffF37979).withOpacity(0.1) : null,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8.0),
             ),
@@ -76,27 +80,18 @@ class _SectionListState extends State<SectionList> {
               children: [
                 IconButton(
                   icon: Icon(Icons.add),
-                  onPressed: () {
-                    setState(() {
-                      showAddSectionDialog(context);
-                    });
-                  },
+                  tooltip: 'Add Section',
+                  onPressed: () => showAddSectionDialog(context),
                 ),
                 IconButton(
                   icon: Icon(Icons.edit),
-                  onPressed: () {
-                    setState(() {
-                      _showEditDialog(context, section);
-                    });
-                  },
+                  tooltip: 'Edit Section',
+                  onPressed: () => _showEditDialog(context, section),
                 ),
                 IconButton(
                   icon: Icon(Icons.delete),
-                  onPressed: () {
-                    setState(() {
-                      showDeleteSectionDialog(context, section.sectionDoc!);
-                    });
-                  },
+                  tooltip: 'Delete Section',
+                  onPressed: () => _showDeleteConfirmation(context, section.sectionDoc!),
                 ),
               ],
             ),
@@ -107,76 +102,92 @@ class _SectionListState extends State<SectionList> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'Section is empty',
-          style: TextStyle(
-            fontSize: 16.0,
-            color: Colors.grey,
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.info_outline, size: 64.0, color: Colors.grey),
+          SizedBox(height: 16.0),
+          Text(
+            'No sections available.',
+            style: TextStyle(fontSize: 18.0, color: Colors.grey),
           ),
-        ),
-        SizedBox(height: 16.0),
-        ElevatedButton(
-          onPressed: () {
-            // Show add section dialog or navigate to add section screen
-            showAddSectionDialog(context);
-          },
-          child: Text('Add Section'),
-        ),
-      ],
-    );
-  }
-}
-
-void _showEditDialog(BuildContext context, Section section) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Edit Unit'),
-        content: EditSectionScreen(
-          section: section,
-        ),
-      );
-    },
-  );
-}
-
-void showDeleteSectionDialog(BuildContext context, String sectionId) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Delete Section'),
-        content: Text('Are you sure you want to delete this section?'),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              try {
-                await Database().deleteSection(sectionId);
-                Navigator.of(context).pop(); // Close the dialog
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Section deleted successfully')),
-                );
-              } catch (e) {
-                // Handle error gracefully
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error deleting section: $e')),
-                );
-              }
-            },
-            child: Text('Delete'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Close the dialog
-            },
-            child: Text('Cancel'),
+          SizedBox(height: 16.0),
+          ElevatedButton.icon(
+            onPressed: () => showAddSectionDialog(context),
+            icon: Icon(Icons.add),
+            label: Text('Add Section'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xffF37979),
+            ),
           ),
         ],
-      );
-    },
-  );
+      ),
+    );
+  }
+
+  void _showEditDialog(BuildContext context, Section section) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Edit Section'),
+          content: EditSectionScreen(section: section),
+        );
+      },
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, String sectionId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Section'),
+          content: Text('Are you sure you want to delete this section?'),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop(); // Close the dialog
+                _showLoadingDialog(context);
+                try {
+                  await Database().deleteSection(sectionId);
+                  Navigator.of(context).pop(); // Close the loading dialog
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Section deleted successfully')),
+                  );
+                } catch (e) {
+                  Navigator.of(context).pop(); // Close the loading dialog
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error deleting section: $e')),
+                  );
+                }
+              },
+              child: Text('Delete'),
+              style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Center(
+          child: SpinKitCubeGrid(),
+        );
+      },
+    );
+  }
 }

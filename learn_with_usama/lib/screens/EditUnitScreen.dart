@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../models/Unit.dart';
 import '../services/database.dart';
 
@@ -146,7 +147,7 @@ class _EditUnitScreenState extends State<EditUnitScreen> {
                 ),
                 SizedBox(height: 24.0),
                 _isLoading
-                    ? CircularProgressIndicator()
+                    ? SpinKitCubeGrid(color: Color(0xffF37979))
                     : ElevatedButton(
                   onPressed: _saveChanges,
                   child: Text('Save Changes'),

@@ -30,16 +30,16 @@ class _CourseListState extends State<CourseList> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
         decoration: BoxDecoration(
-          color: Colors.grey[200],
+          color: Color(0xffFFD7D7),
           borderRadius: BorderRadius.circular(12.0),
-          border: Border.all(color: Colors.deepPurpleAccent, width: 2),
+          border: Border.all(color: Color(0xffF37979), width: 2),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Text(
               '${widget.course.courseId}. ${widget.course.courseName!}',
-              style: TextStyle(color: Colors.deepPurple, fontSize: 16.0),
+              style: TextStyle(color: Color(0xffF37979), fontSize: 16.0),
             ),
           SizedBox(width: 15.0),
           Row(children: [

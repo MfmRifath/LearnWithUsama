@@ -2,12 +2,15 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:learn_with_usama/root.dart';
 import 'package:learn_with_usama/screens/CourseScreen.dart';
+import 'package:learn_with_usama/screens/ForgetPasswordScreen.dart';
 import 'package:learn_with_usama/screens/Home.dart';
 import 'package:learn_with_usama/screens/LoginScreen.dart';
 import 'package:learn_with_usama/screens/ProfileScreen.dart';
 import 'package:learn_with_usama/screens/RegisterScreen.dart';
+import 'package:learn_with_usama/screens/SettingScreen.dart';
 import 'package:learn_with_usama/screens/TheoryScreen.dart';
 import 'package:learn_with_usama/screens/UnitsWidget.dart';
+import 'package:learn_with_usama/screens/editUserDetailScreen.dart';
 import 'package:learn_with_usama/services/database.dart';
 import 'package:provider/provider.dart';
 import 'models/Courses.dart';
@@ -66,6 +69,9 @@ class learnWithUsama extends StatelessWidget {
             return CourseScreen(course: courseList,section: sectionList, unit: selectedUnit,);
           },
           '/profile': (context) => ProfileScreen(),
+          '/addUserDetail': (context) => EditUserDetailsPage(),
+          '/setting':(context) => SettingsPage(),
+          '/forgotPassword': (context) => ForgotPasswordScreen()
           // Make sure to add the Home route
         },
       ),

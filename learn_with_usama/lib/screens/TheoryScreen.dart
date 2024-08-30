@@ -5,14 +5,13 @@ import 'package:learn_with_usama/models/Courses.dart';
 import 'package:learn_with_usama/models/Section.dart';
 import 'package:learn_with_usama/widget/AppBar.dart';
 import 'package:learn_with_usama/widget/NavDrawer.dart';
-
 import '../models/Unit.dart';
-
 import 'UnitsWidget.dart';
-class Theoryscreen extends StatefulWidget {
-  late List <Unit> unit;
 
-   Theoryscreen({required this.unit});
+class Theoryscreen extends StatefulWidget {
+  late List<Unit> unit;
+
+  Theoryscreen({required this.unit});
 
   @override
   State<Theoryscreen> createState() => _TheoryscreenState();
@@ -20,8 +19,6 @@ class Theoryscreen extends StatefulWidget {
 
 class _TheoryscreenState extends State<Theoryscreen> {
   late final FirebaseFirestore firestore_;
-
-
 
   @override
   void initState() {
@@ -35,12 +32,13 @@ class _TheoryscreenState extends State<Theoryscreen> {
       final querySnapshot = await firestore_.collection('units').get();
       return querySnapshot.docs.length;
     }
+
     return Scaffold(
       drawer: NavDrawer(),
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            AppBar1(page: '/home',),
+            AppBar1(page: '/home'),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
@@ -50,22 +48,30 @@ class _TheoryscreenState extends State<Theoryscreen> {
                     'Theory Explanation',
                     style: GoogleFonts.nunito(
                       textStyle: const TextStyle(
+                        fontSize: 18.0,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(right: 10.0),
-                    child: FutureBuilder(future: getUnitCount(), builder: (context, snapshot) {
+                  FutureBuilder(
+                    future: getUnitCount(),
+                    builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return CircularProgressIndicator();
                       } else if (snapshot.hasError) {
-                        return Text('Error: ${snapshot.error}');
+                        return Row(
+                          children: [
+                            Icon(Icons.error_outline, color: Colors.red),
+                            SizedBox(width: 4.0),
+                            Text('Error loading units'),
+                          ],
+                        );
                       } else if (snapshot.hasData) {
                         return Text(
                           '${snapshot.data} Available Units',
                           style: GoogleFonts.nunito(
                             textStyle: const TextStyle(
+                              fontSize: 14.0,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -73,39 +79,49 @@ class _TheoryscreenState extends State<Theoryscreen> {
                       } else {
                         return Text('No units available');
                       }
-                    },),
-                  )
-
+                    },
+                  ),
                 ],
               ),
             ),
             Expanded(
-              child: ListView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
-                      itemCount: widget.unit.length,
-                      itemBuilder: (context, index) => Units(unit: widget.unit[index]),
-                    )
-
-
+              child: widget.unit.isEmpty
+                  ? Center(
+                child: Text(
+                  'No units available',
+                  style: GoogleFonts.nunito(
+                    textStyle: const TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              )
+                  : ListView.builder(
+                padding: EdgeInsets.symmetric(
+                    horizontal: 10.0, vertical: 20.0),
+                itemCount: widget.unit.length,
+                itemBuilder: (context, index) => Units(
+                  unit: widget.unit[index],
+                ),
               ),
-
+            ),
             Align(
               alignment: Alignment.bottomRight,
               child: Padding(
                 padding: const EdgeInsets.all(10.0),
-                child: Container(
-                  child: IconButton(
-                    hoverColor: Color(0xffFFD7D7),
-                    icon: Icon(Icons.add),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AddUnitDialog();
-                        },
-                      );
-                    },
-                  ),
+                child: FloatingActionButton.extended(
+                  backgroundColor: Colors.pinkAccent,
+                  icon: Icon(Icons.add),
+                  label: Text("Add Unit"),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AddUnitDialog();
+                      },
+                    );
+                  },
                 ),
               ),
             ),

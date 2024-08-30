@@ -14,6 +14,7 @@ class AppBar1 extends StatefulWidget {
 }
 
 class _AppBar1State extends State<AppBar1> {
+  final User? user = FirebaseAuth.instance.currentUser;
   OverlayEntry? _overlayEntry;
   final _auth = FirebaseAuth.instance;
 
@@ -42,16 +43,19 @@ class _AppBar1State extends State<AppBar1> {
 
     return Container(
       color: Colors.white60,
-       child: Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          IconButton(onPressed:(){
-            if(widget.page == ''){
-              Navigator.pop(context);
-            } else{
-              Navigator.pushNamed(context, widget.page);
-            }
-            }, icon: Icon(CupertinoIcons.back)),
+          IconButton(
+            onPressed: () {
+              if (widget.page == '') {
+                Navigator.pop(context);
+              } else {
+                Navigator.pushNamed(context, widget.page);
+              }
+            },
+            icon: Icon(CupertinoIcons.back),
+          ),
           Builder(
             builder: (context) => TextButton.icon(
               style: ButtonStyle(
@@ -62,14 +66,23 @@ class _AppBar1State extends State<AppBar1> {
                 Scaffold.of(context).openDrawer();
               },
               icon: ClipOval(
-                child: Image.asset(
-                  'images/s2o-academy.png',
+                child: Image.network(
+                  user?.photoURL?.isNotEmpty == true
+                      ? user!.photoURL!
+                      : 'https://www.freepik.com/free-vector/blue-circle-with-white-user_145857007.htm#query=user&position=2&from_view=keyword&track=ais_hybrid&uuid=4ce622f1-6c18-440b-bed8-9508d7a6eea1', // Replace with your default image URL or asset
                   height: 50.0,
                   width: 50.0,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      'images/profile.jpg', // Path to a default asset image
+                      height: 50.0,
+                      width: 50.0,
+                    );
+                  },
                 ),
               ),
               label: Text(
-                '${_auth.currentUser?.email.toString()}',
+                '${user?.displayName ?? 'Edit Your Profile'}',
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
@@ -77,16 +90,13 @@ class _AppBar1State extends State<AppBar1> {
               ),
             ),
           ),
-          // Display notification icon only on larger screens
-            IconButton(
-              color: Colors.pinkAccent,
-              onPressed: _showNotification,
-              icon: Icon(CupertinoIcons.bell),
-            ),
+          IconButton(
+            color: Colors.pinkAccent,
+            onPressed: _showNotification,
+            icon: Icon(CupertinoIcons.bell),
+          ),
         ],
       ),
     );
   }
-
-
 }

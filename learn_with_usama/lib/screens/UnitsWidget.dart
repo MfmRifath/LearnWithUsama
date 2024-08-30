@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:learn_with_usama/models/Courses.dart';
 import 'package:learn_with_usama/models/Section.dart';
-
 import 'package:learn_with_usama/models/Unit.dart';
 import 'package:learn_with_usama/services/database.dart';
 import '../screens/AddUnitScreen.dart';
 import '../screens/EditUnitScreen.dart';
-Unit selectedUnit =Unit();
+
+Unit selectedUnit = Unit();
 
 class Units extends StatefulWidget {
   const Units({super.key, required this.unit, this.courses, this.section});
@@ -19,53 +19,56 @@ class Units extends StatefulWidget {
 }
 
 class _UnitsState extends State<Units> {
-
   @override
   Widget build(BuildContext context) {
-
     return Padding(
-      padding: EdgeInsets.all(3.0),
-      child: TextButton(
-        style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all(Color(0xffFF8A8A)),
+      padding: EdgeInsets.all(8.0),
+      child: Card(
+        elevation: 4.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
         ),
-        onPressed: () {
-          selectedUnit = widget.unit!;
-          Navigator.pushNamed(context,'/courseScreen'
-          );
-        },
-        child: ListTile(
-          contentPadding: EdgeInsets.all(10.0),
-          leading: Image.asset(
-            'images/${widget.unit!.unitName}.jpg', // Adjust file extension if needed
-            width: 50.0,
-            height: 50.0,
-            fit: BoxFit.cover,
-          ),
-          title: Text(
-            '${widget.unit!.unitNumber}. ${widget.unit!.unitName}',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 16.0,
-              fontWeight: FontWeight.bold,
+        child: InkWell(
+          onTap: () {
+            selectedUnit = widget.unit!;
+            Navigator.pushNamed(context, '/courseScreen');
+          },
+          child: ListTile(
+            contentPadding: EdgeInsets.all(10.0),
+            leading: ClipRRect(
+              borderRadius: BorderRadius.circular(8.0),
+              child: Image.asset(
+                'images/${widget.unit!.unitName}.jpg',
+                width: 50.0,
+                height: 50.0,
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () {
-                  _showEditDialog(context);
-                },
+            title: Text(
+              '${widget.unit!.unitNumber}. ${widget.unit!.unitName}',
+              style: TextStyle(
+                color: Colors.black87,
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
               ),
-              IconButton(
-                icon: Icon(Icons.delete),
-                onPressed: () {
-                  _showDeleteDialog(context);
-                },
-              ),
-            ],
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.edit, color: Colors.blueAccent),
+                  onPressed: () {
+                    _showEditDialog(context);
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete, color: Colors.redAccent),
+                  onPressed: () {
+                    _showDeleteDialog(context);
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -76,9 +79,11 @@ class _UnitsState extends State<Units> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Edit Unit'),
-          content: EditUnitScreen(
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          child: EditUnitScreen(
             unit: widget.unit!,
           ),
         );
@@ -92,27 +97,36 @@ class _UnitsState extends State<Units> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Delete Unit'),
-          content: Text('Are you sure you want to delete this unit?'),
+          content: Text('Are you sure you want to delete this unit? This action cannot be undone.'),
           actions: [
             TextButton(
               onPressed: () async {
                 try {
                   await Database().deleteUnit(widget.unit!.documentId);
                   Navigator.of(context).pop(); // Close the dialog
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Unit deleted successfully!'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
                 } catch (e) {
                   // Handle error gracefully
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error deleting unit: $e')),
+                    SnackBar(
+                      content: Text('Error deleting unit: $e'),
+                      backgroundColor: Colors.red,
+                    ),
                   );
                 }
               },
-              child: Text('Delete'),
+              child: Text('Delete', style: TextStyle(color: Colors.redAccent)),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
               },
-              child: Text('Cancel'),
+              child: Text('Cancel', style: TextStyle(color: Colors.blueAccent)),
             ),
           ],
         );
@@ -127,6 +141,9 @@ class AddUnitDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
+      ),
       child: AddUnitScreen(),
     );
   }

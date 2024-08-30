@@ -1,5 +1,6 @@
 import 'dart:core';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:learn_with_usama/services/Course&SectionSevices.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -37,6 +38,7 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
   String url = '';
   String? _selectedCourseId;
   bool isLesson = false;
+  bool _isLoading = true; // Loading indicator flag
 
   @override
   void initState() {
@@ -44,6 +46,12 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
     _initializeYoutubePlayer();
     _initializeAnimationController();
     _tabController = TabController(length: 2, vsync: this);
+    // Simulate a network call or heavy processing
+    Future.delayed(Duration(seconds: 2), () {
+      setState(() {
+        _isLoading = false; // Stop loading after delay
+      });
+    });
   }
 
   void _initializeYoutubePlayer() {
@@ -99,6 +107,7 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
 
   Future<bool> _onWillPop() async {
     if (_animationController.isAnimating) {
+      _controller.pause();
       _animationController.reverse();
       return false;
     }
@@ -110,13 +119,17 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double screenHight = MediaQuery.of(context).size.height;
+    double screenHeight = MediaQuery.of(context).size.height;
 
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
         body: SafeArea(
-          child: YoutubePlayerBuilder(
+          child: _isLoading
+              ? Center(child: SpinKitCubeGrid(
+              color: Color(0xffF37979)
+          )) // Show loading indicator
+              : YoutubePlayerBuilder(
             player: YoutubePlayer(controller: _controller),
             builder: (context, player) {
               return Column(
@@ -126,7 +139,7 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
                   SizedBox(height: 15.0),
                   TabBar(
                     controller: _tabController,
-                    indicatorColor: Color(0xFF5A56F2),
+                    indicatorColor: Color(0xFFF37979),
                     labelColor: Colors.black,
                     unselectedLabelColor: Colors.grey,
                     tabs: [
@@ -274,40 +287,45 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
       );
     } else {
       return Expanded(
-        child: ListView(
+        child: ListView.builder(
           padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
-          children: filteredCourses.map((course) {
+          itemCount: filteredCourses.length,
+          itemBuilder: (context, index) {
+            final course = filteredCourses[index];
             final courseSections = widget.section
                 .where((section) => section.courseId == course.courseId && section.unitId == course.unitId)
                 .toList();
 
-            return Column(
-              children: [
-                CourseList(
-                  course: course,
-                  toggle: () {
-                    setState(() {
-                      _selectedCourseId = course.courseId;
-                      _toggleMenu();
-                    });
-                  },
-                ),
-                if (_selectedCourseId == course.courseId)
-                  SectionList(
-                    animation: _animation,
-                    items: courseSections,
-                    selectedItem: _selectedItem,
-                    onSectionTap: (sectionName) {
-                      _onSectionTap(
-                        sectionName!,
-                        courseSections.firstWhere((section) => section.sectionName == sectionName).sectionUrl ?? '',
-                      );
+            return AnimatedSize(
+              duration: Duration(milliseconds: 300),
+              child: Column(
+                children: [
+                  CourseList(
+                    course: course,
+                    toggle: () {
+                      setState(() {
+                        _selectedCourseId = course.courseId;
+                        _toggleMenu();
+                      });
                     },
-                    firestore: FirebaseFirestore.instance,
                   ),
-              ],
+                  if (_selectedCourseId == course.courseId)
+                    SectionList(
+                      animation: _animation,
+                      items: courseSections,
+                      selectedItem: _selectedItem,
+                      onSectionTap: (sectionName) {
+                        _onSectionTap(
+                          sectionName!,
+                          courseSections.firstWhere((section) => section.sectionName == sectionName).sectionUrl ?? '',
+                        );
+                      },
+                      firestore: FirebaseFirestore.instance,
+                    ),
+                ],
+              ),
             );
-          }).toList(),
+          },
         ),
       );
     }
@@ -329,9 +347,43 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
             ),
             TextButton(
               onPressed: () {
+                _controller.pause();
                 Navigator.pushNamed(context, '/theoryScreen');
               },
               child: Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showAddCourseDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Add New Course'),
+          content: TextField(
+            decoration: InputDecoration(hintText: "Course Name"),
+            onSubmitted: (value) {
+              // Handle course addition logic here
+              Navigator.of(context).pop();
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Handle course addition logic here
+                Navigator.of(context).pop();
+              },
+              child: Text('Add'),
             ),
           ],
         );

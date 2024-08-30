@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:learn_with_usama/models/Unit.dart';
 import 'package:learn_with_usama/services/database.dart';
@@ -85,7 +86,9 @@ class _AddUnitScreenState extends State<AddUnitScreen> {
             ),
           SizedBox(height: 20.0),
           _isSubmitting
-              ? CircularProgressIndicator()
+              ? SpinKitCubeGrid(
+            color: Color(0xffF37979),
+          )
               : ElevatedButton(
             onPressed: () {
               Database().addUnit(Unit(unitName: unitName,unitNumber: unitNumber, payment: payment,overviewDescription: overviewDescription));
