@@ -19,6 +19,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
   late TextEditingController _sectionUrlController;
   late TextEditingController _sectionDurationController;
   late TextEditingController _courseIdController;
+  late TextEditingController _unitIdController;
   bool _isLoading = false;
 
   @override
@@ -29,6 +30,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
     _sectionUrlController = TextEditingController(text: widget.section.sectionUrl);
     _sectionDurationController = TextEditingController(text: widget.section.sectionDuration);
     _courseIdController =TextEditingController(text: widget.section.courseId);
+    _unitIdController = TextEditingController(text: widget.section.unitId );
   }
 
   @override
@@ -38,6 +40,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
     _sectionUrlController.dispose();
     _sectionDurationController.dispose();
     _courseIdController.dispose();
+    _unitIdController.dispose();
     super.dispose();
   }
 
@@ -54,6 +57,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
         sectionDuration: _sectionDurationController.text.trim(),
         sectionUrl: _sectionUrlController.text.trim(),
         courseId: _courseIdController.text.trim(),
+        unitId: _unitIdController.text.trim(),
       );
 
       try {
@@ -144,6 +148,20 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please enter an Section URL';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16.0),
+                TextFormField(
+                  controller: _unitIdController,
+                  decoration: InputDecoration(
+                    labelText: 'Unit Id',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter an Unit Id';
                     }
                     return null;
                   },

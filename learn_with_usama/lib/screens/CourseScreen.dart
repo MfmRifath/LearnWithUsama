@@ -1,6 +1,7 @@
 import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:learn_with_usama/services/Course&SectionSevices.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../models/Section.dart';
 import '../models/Courses.dart';
@@ -26,10 +27,11 @@ class CourseScreen extends StatefulWidget {
   State<CourseScreen> createState() => _CourseScreenState();
 }
 
-class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMixin{
+class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMixin {
   late YoutubePlayerController _controller;
   late AnimationController _animationController;
   late Animation<double> _animation;
+  late TabController _tabController;
   String? _selectedItem;
   bool _isMenuOpen = false;
   String url = '';
@@ -41,6 +43,7 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
     super.initState();
     _initializeYoutubePlayer();
     _initializeAnimationController();
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   void _initializeYoutubePlayer() {
@@ -52,7 +55,6 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
       ),
     );
   }
-
 
   void _initializeAnimationController() {
     _animationController = AnimationController(
@@ -69,6 +71,7 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
   void dispose() {
     _controller.dispose();
     _animationController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -94,15 +97,12 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
     });
   }
 
-
   Future<bool> _onWillPop() async {
     if (_animationController.isAnimating) {
-      // If the animation is running, prevent back navigation
-      _animationController.reverse(); // Reverse the animation before allowing navigation
+      _animationController.reverse();
       return false;
     }
 
-    // If animation is not running, show the back dialog
     final shouldPop = await _showBackDialog(context);
     return shouldPop ?? false;
   }
@@ -110,6 +110,7 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    double screenHight = MediaQuery.of(context).size.height;
 
     return WillPopScope(
       onWillPop: _onWillPop,
@@ -123,40 +124,25 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
                   AppBar1(page: '/theoryScreen'),
                   player,
                   SizedBox(height: 15.0),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 30.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: <Widget>[
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            foregroundColor: !isLesson ? Colors.white : Colors.black, backgroundColor: !isLesson ? Color(0xffF37979) : Colors.transparent,
-                            padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                          ),
-                          onPressed: () => setState(() => isLesson = false),
-                          child: Text('Overview'),
-                        ),
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            foregroundColor: isLesson ? Colors.white : Colors.black, backgroundColor: isLesson ? Color(0xffF37979) : Colors.transparent,
-                            padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                          ),
-                          onPressed: () => setState(() => isLesson = true),
-                          child: Text('Lessons'),
-                        ),
+                  TabBar(
+                    controller: _tabController,
+                    indicatorColor: Color(0xFF5A56F2),
+                    labelColor: Colors.black,
+                    unselectedLabelColor: Colors.grey,
+                    tabs: [
+                      Tab(text: "OverView"),
+                      Tab(text: "Lessons"),
+                    ],
+                  ),
+                  Expanded(
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildOverview(screenWidth),
+                        _buildLessonList(),
                       ],
                     ),
                   ),
-                  if (!isLesson)
-                    _buildOverview(screenWidth)
-                  else
-                    _buildLessonList(),
                 ],
               );
             },
@@ -247,71 +233,109 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
   }
 
   Widget _buildLessonList() {
-    return Expanded(
-      child: ListView(
-        padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
-        children: widget.course
-            .where((course) => course.unitId == widget.unit.unitNumber)
-            .map((course) {
-          final courseSections = widget.section
-              .where((section) => section.courseId == course.courseId)
-              .toList();
+    final filteredCourses = widget.course.where((course) => course.unitId == widget.unit.unitNumber).toList();
 
-          return Column(
+    if (filteredCourses.isEmpty) {
+      return Expanded(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CourseList(
-                course: course,
-                toggle: () {
-                  setState(() {
-                    _selectedCourseId = course.courseId;
-                    _toggleMenu();
-                  });
-                },
-              ),
-              if (_selectedCourseId == course.courseId)
-                SectionList(
-                  animation: _animation,
-                  items: courseSections,
-                  selectedItem: _selectedItem,
-                  onSectionTap: (sectionName) {
-                    _onSectionTap(
-                      sectionName!,
-                      courseSections.firstWhere((section) =>
-                      section.sectionName == sectionName).sectionUrl ?? '',
-                    );
-                  },
-                  firestore: FirebaseFirestore.instance,
+              Text(
+                'No courses available for this unit.',
+                style: GoogleFonts.nunito(
+                  textStyle: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.0,
+                  ),
                 ),
+              ),
+              SizedBox(height: 20.0),
+              TextButton(
+                onPressed: () {
+                  showAddCourseDialog(context);
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: Color(0xffF37979),
+                  padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
+                ),
+                child: Text(
+                  'Add Course',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16.0,
+                  ),
+                ),
+              ),
             ],
-          );
-        }).toList(),
-      ),
+          ),
+        ),
+      );
+    } else {
+      return Expanded(
+        child: ListView(
+          padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+          children: filteredCourses.map((course) {
+            final courseSections = widget.section
+                .where((section) => section.courseId == course.courseId && section.unitId == course.unitId)
+                .toList();
+
+            return Column(
+              children: [
+                CourseList(
+                  course: course,
+                  toggle: () {
+                    setState(() {
+                      _selectedCourseId = course.courseId;
+                      _toggleMenu();
+                    });
+                  },
+                ),
+                if (_selectedCourseId == course.courseId)
+                  SectionList(
+                    animation: _animation,
+                    items: courseSections,
+                    selectedItem: _selectedItem,
+                    onSectionTap: (sectionName) {
+                      _onSectionTap(
+                        sectionName!,
+                        courseSections.firstWhere((section) => section.sectionName == sectionName).sectionUrl ?? '',
+                      );
+                    },
+                    firestore: FirebaseFirestore.instance,
+                  ),
+              ],
+            );
+          }).toList(),
+        ),
+      );
+    }
+  }
+
+  Future<bool?> _showBackDialog(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Are you sure?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/theoryScreen');
+              },
+              child: Text('Yes'),
+            ),
+          ],
+        );
+      },
     );
   }
-}
-
-Future<bool?> _showBackDialog(BuildContext context) {
-  return showDialog<bool>(
-    context: context,
-    barrierDismissible: false, // Prevent dismissing the dialog by tapping outside
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Are you sure?'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false); // Return false to indicate not to pop
-            },
-            child: Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/theoryScreen'); // Return true to indicate to pop
-            },
-            child: Text('Yes'),
-          ),
-        ],
-      );
-    },
-  );
 }

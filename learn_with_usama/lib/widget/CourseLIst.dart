@@ -38,7 +38,7 @@ class _CourseListState extends State<CourseList> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Text(
-              '${widget.course.courseId} .${widget.course.courseName!}',
+              '${widget.course.courseId}. ${widget.course.courseName!}',
               style: TextStyle(color: Colors.deepPurple, fontSize: 16.0),
             ),
           SizedBox(width: 15.0),

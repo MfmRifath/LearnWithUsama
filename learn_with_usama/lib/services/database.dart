@@ -55,7 +55,8 @@ class Database with ChangeNotifier {
           sectionUrl: data['sectionUrl'] as String? ?? '',
           sectionDuration: data['sectionDuration'] as String? ?? '',
           courseId: data['courseId'] as String? ?? '',
-          sectionDoc: document.id
+          sectionDoc: document.id,
+            unitId: data['unitId'] as String? ?? '',
         );
       }).toList();
     }).handleError((error) {
@@ -172,6 +173,7 @@ class Database with ChangeNotifier {
         'sectionUrl': section.sectionUrl,
         'sectionDuration': section.sectionDuration,
         'courseId': section.courseId,
+        'unitId' : section.unitId
       });
       notifyListeners();
     } catch (e) {

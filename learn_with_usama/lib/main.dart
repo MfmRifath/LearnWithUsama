@@ -4,6 +4,7 @@ import 'package:learn_with_usama/root.dart';
 import 'package:learn_with_usama/screens/CourseScreen.dart';
 import 'package:learn_with_usama/screens/Home.dart';
 import 'package:learn_with_usama/screens/LoginScreen.dart';
+import 'package:learn_with_usama/screens/ProfileScreen.dart';
 import 'package:learn_with_usama/screens/RegisterScreen.dart';
 import 'package:learn_with_usama/screens/TheoryScreen.dart';
 import 'package:learn_with_usama/screens/UnitsWidget.dart';
@@ -64,6 +65,7 @@ class learnWithUsama extends StatelessWidget {
             final sectionList = Provider.of<List<Section>>(context);
             return CourseScreen(course: courseList,section: sectionList, unit: selectedUnit,);
           },
+          '/profile': (context) => ProfileScreen(),
           // Make sure to add the Home route
         },
       ),

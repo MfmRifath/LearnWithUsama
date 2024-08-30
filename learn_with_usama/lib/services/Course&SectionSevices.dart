@@ -61,13 +61,14 @@ Future<void> showAddCourseDialog(BuildContext context) async {
 }
 
 // Add Section Dialog
-Future<void> showAddSectionDialog(String courseId, BuildContext context) async {
+Future<void> showAddSectionDialog(BuildContext context) async {
   String sectionName = '';
   String sectionUrl = '';
   String sectionDuration = '';
   String sectionId = '';
   String courseId ='';
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  String unitId ='';
+
 
   await showDialog(
     context: context,
@@ -107,6 +108,12 @@ Future<void> showAddSectionDialog(String courseId, BuildContext context) async {
                 sectionDuration = value;
               },
             ),
+            TextField(
+              decoration: InputDecoration(labelText: 'Unit Id'),
+              onChanged: (value) {
+                unitId = value;
+              },
+            ),
           ],
         ),
       ),
@@ -118,7 +125,7 @@ Future<void> showAddSectionDialog(String courseId, BuildContext context) async {
         TextButton(
           onPressed: () async {
             try {
-              await Database().addSection(Section(courseId: courseId, sectionId: sectionId, sectionUrl: sectionUrl, sectionName: sectionName, sectionDuration: sectionDuration));
+              await Database().addSection(Section(courseId: courseId, sectionId: sectionId, sectionUrl: sectionUrl, sectionName: sectionName, sectionDuration: sectionDuration, unitId: unitId));
               Navigator.of(context).pop();
             } catch (e) {
               print('Error adding section: $e');
