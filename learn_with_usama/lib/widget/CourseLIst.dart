@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +25,8 @@ class CourseList extends StatefulWidget {
 }
 
 class _CourseListState extends State<CourseList> {
+
+
   @override
   Widget build(BuildContext context) {
     return InkWell(

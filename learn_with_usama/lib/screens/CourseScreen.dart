@@ -286,7 +286,7 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
         ),
       );
     } else {
-      return Expanded(
+      return SizedBox(
         child: ListView.builder(
           padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
           itemCount: filteredCourses.length,

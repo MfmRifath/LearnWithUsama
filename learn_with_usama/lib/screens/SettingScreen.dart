@@ -10,7 +10,7 @@ class SettingsPage extends StatelessWidget {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            // Navigate back
+            Navigator.of(context).pop();  // Navigate back
           },
         ),
       ),
@@ -21,80 +21,86 @@ class SettingsPage extends StatelessWidget {
             title: 'Account',
             tiles: [
               SettingsTile(
-                icon: Icons.person,
+                icon: Icons.person_outline,
                 title: 'Edit profile',
                 onTap: () {},
               ),
               SettingsTile(
-                icon: Icons.security,
+                icon: Icons.security_outlined,
                 title: 'Security',
-                onTap: () {},
+                onTap: () {Navigator.pushNamed(context, '/security');},
               ),
               SettingsTile(
-                icon: Icons.notifications,
+                icon: Icons.notifications_outlined,
                 title: 'Notifications',
-                onTap: () {},
+                onTap: () {Navigator.pushNamed(context, '/notification');},
               ),
               SettingsTile(
-                icon: Icons.lock,
+                icon: Icons.lock_outline,
                 title: 'Privacy',
-                onTap: () {},
+                onTap: () {
+                  Navigator.pushNamed(context, '/privacy');
+
+                },
               ),
             ],
           ),
+          Divider(thickness: 1.0, color: Colors.grey.shade300),
           // Support & About section
           SettingsSection(
             title: 'Support & About',
             tiles: [
               SettingsTile(
-                icon: Icons.subscriptions,
+                icon: Icons.subscriptions_outlined,
                 title: 'My Subscription',
                 onTap: () {},
               ),
               SettingsTile(
-                icon: Icons.help,
+                icon: Icons.help_outline,
                 title: 'Help & Support',
                 onTap: () {},
               ),
               SettingsTile(
-                icon: Icons.info,
+                icon: Icons.info_outline,
                 title: 'Terms and Policies',
                 onTap: () {},
               ),
             ],
           ),
+          Divider(thickness: 1.0, color: Colors.grey.shade300),
           // Cache & Cellular section
           SettingsSection(
             title: 'Cache & Cellular',
             tiles: [
               SettingsTile(
-                icon: Icons.delete,
+                icon: Icons.delete_outline,
                 title: 'Free up space',
                 onTap: () {},
               ),
               SettingsTile(
-                icon: Icons.data_usage,
+                icon: Icons.data_usage_outlined,
                 title: 'Data Saver',
                 onTap: () {},
               ),
             ],
           ),
+          Divider(thickness: 1.0, color: Colors.grey.shade300),
           // Actions section
           SettingsSection(
             title: 'Actions',
             tiles: [
               SettingsTile(
-                icon: Icons.report,
+                icon: Icons.report_outlined,
                 title: 'Report a problem',
                 onTap: () {},
               ),
               SettingsTile(
-                icon: Icons.person_add,
+                icon: Icons.person_add_outlined,
                 title: 'Add account',
                 onTap: () {},
               ),
               SettingsTile(
-                icon: Icons.logout,
+                icon: Icons.logout_outlined,
                 title: 'Log out',
                 onTap: () {},
               ),
@@ -105,25 +111,25 @@ class SettingsPage extends StatelessWidget {
       bottomNavigationBar: BottomNavigationBar(
         items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '',
+            icon: Icon(Icons.home_outlined),
+            label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: '',
+            icon: Icon(Icons.search_outlined),
+            label: 'Search',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: '',
+            icon: Icon(Icons.settings_outlined),
+            label: 'Settings',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: '',
+            icon: Icon(Icons.person_outline),
+            label: 'Profile',
           ),
         ],
         currentIndex: 2,
         onTap: (index) {
-          // Handle navigation
+          // Handle navigation based on the tapped index
         },
       ),
       floatingActionButton: FloatingActionButton(
@@ -150,13 +156,16 @@ class SettingsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            color: Colors.grey.shade200,
+            width: double.infinity,
             child: Text(
               title,
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
               ),
             ),
           ),
@@ -177,9 +186,10 @@ class SettingsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
+      leading: Icon(icon, color: Theme.of(context).primaryColor),
+      title: Text(title, style: TextStyle(fontSize: 16)),
       onTap: onTap,
+      trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey.shade600),
     );
   }
 }

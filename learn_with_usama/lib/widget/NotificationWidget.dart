@@ -1,3 +1,4 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 
 class NotificationWidget extends StatelessWidget {
@@ -18,26 +19,21 @@ class NotificationWidget extends StatelessWidget {
             color: Colors.black.withOpacity(0.8),
             borderRadius: BorderRadius.circular(8.0),
           ),
-          child: Column(
+          child: Row(
             children: <Widget>[
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.notification_important, color: Colors.white),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      "Notifications",
-                      style: TextStyle(color: Colors.white),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  IconButton(
-                    icon: Icon(Icons.close, color: Colors.white),
-                    onPressed: onDismiss,
-                  ),
-                ],
+              Icon(Icons.notification_important, color: Colors.white),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  message,
+                  style: TextStyle(color: Colors.white),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              SizedBox(width: 10),
+              IconButton(
+                icon: Icon(Icons.close, color: Colors.white),
+                onPressed: onDismiss,
               ),
             ],
           ),

@@ -46,6 +46,7 @@ dependencies:
   firebase_storage: ^12.2.0
   whatsapp_share: ^2.0.2
   flutter_spinkit: ^5.2.1
+  awesome_notifications: ^0.9.3+1
 
 dev_dependencies:
   flutter_test:

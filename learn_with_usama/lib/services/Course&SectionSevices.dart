@@ -1,15 +1,63 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:learn_with_usama/models/Unit.dart';
-import 'package:learn_with_usama/services/database.dart';
-import '../models/Courses.dart';
-import '../models/Section.dart';
 
-// Add Course Dialog
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+import 'package:learn_with_usama/services/database.dart';
+import 'package:provider/provider.dart';
+import '../main.dart';
+import '../models/Courses.dart';
+import '../models/Notification.dart';
+import '../models/Section.dart';
+import 'NotificationProvider.dart';
+import 'dart:math';
+
+Future<void> createAndStoreNotification(BuildContext context, String title,String body) async {
+  final notification = MyNotification(
+    title: title,
+    body: body,
+    date: DateTime.now(),
+  );
+
+
+  AwesomeNotifications().createNotification(
+    content: NotificationContent(
+      id: Random().nextInt(10000) ,
+      channelKey: '7135',
+      title: notification.title,
+      body: notification.body,
+              ),
+  );
+
+  // Store the notification in Firestore via the provider
+  final notificationProvider = Provider.of<NotificationProvider>(context, listen: false);
+  await notificationProvider.addNotification(notification);
+}
+
 Future<void> showAddCourseDialog(BuildContext context) async {
   String courseName = '';
   String courseId = '';
   String unitId = '';
+  bool isLoading = false;
+
+  // Function to show a loading dialog
+  void _showLoadingDialog() {
+    showDialog(
+      barrierColor: Colors.white10,
+      context: context,
+      barrierDismissible: false, // Prevent dismissing by tapping outside
+      builder: (context) => AlertDialog(
+        content: Row(
+          children: <Widget>[
+            SpinKitDoubleBounce(color: Color(0xffF37979),),
+            SizedBox(width: 20),
+            Text('Adding course...'),
+          ],
+        ),
+      ),
+    );
+  }
+
   await showDialog(
     context: context,
     builder: (context) => AlertDialog(
@@ -46,11 +94,34 @@ Future<void> showAddCourseDialog(BuildContext context) async {
         ),
         TextButton(
           onPressed: () async {
+            // Show loading indicator
+            _showLoadingDialog();
+
             try {
+              String title = 'New Course ${courseId} is Added';
+              String body = 'If you want you can Explore it';
+
+              // Add course and send notification
+              await createAndStoreNotification(context,title,body);
               await Database().addCourse(Courses(courseId: courseId, courseName: courseName, unitId: unitId));
-              Navigator.of(context).pop();
+
+
+              Navigator.of(context).pop(); // Close the loading dialog
+              Navigator.of(context).pop(); // Close the add course dialog
+
+              // Optionally, show a success message
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Course added successfully')),
+              );
+
             } catch (e) {
               print('Error adding course: $e');
+
+              // Close the loading dialog and show error message
+              Navigator.of(context).pop(); // Close the loading dialog
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error adding course: $e')),
+              );
             }
           },
           child: Text('Add'),
@@ -60,15 +131,19 @@ Future<void> showAddCourseDialog(BuildContext context) async {
   );
 }
 
+// Example function to show a local notification
+
 // Add Section Dialog
 Future<void> showAddSectionDialog(BuildContext context) async {
   String sectionName = '';
   String sectionUrl = '';
   String sectionDuration = '';
   String sectionId = '';
-  String courseId ='';
-  String unitId ='';
+  String courseId = '';
+  String unitId = '';
 
+  // Create a global key for the loading dialog
+  final GlobalKey<State> _keyLoader = GlobalKey<State>();
 
   await showDialog(
     context: context,
@@ -124,11 +199,44 @@ Future<void> showAddSectionDialog(BuildContext context) async {
         ),
         TextButton(
           onPressed: () async {
+            // Show the loading dialog
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  key: _keyLoader,
+                  content: Row(
+                    children: <Widget>[
+                      SpinKitDoubleBounce(color: Color(0xffF37979),),
+                      SizedBox(width: 20),
+                      Text('Adding section...'),
+                    ],
+                  ),
+                );
+              },
+            );
+
             try {
-              await Database().addSection(Section(courseId: courseId, sectionId: sectionId, sectionUrl: sectionUrl, sectionName: sectionName, sectionDuration: sectionDuration, unitId: unitId));
-              Navigator.of(context).pop();
+              // Call your method to add the section
+              await Database().addSection(Section(
+                courseId: courseId,
+                sectionId: sectionId,
+                sectionUrl: sectionUrl,
+                sectionName: sectionName,
+                sectionDuration: sectionDuration,
+                unitId: unitId,
+              ));
+              Navigator.of(context).pop(); // Close the loading dialog
+              Navigator.of(context).pop(); // Close the add section dialog
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Section added successfully')),
+              );
             } catch (e) {
-              print('Error adding section: $e');
+              Navigator.of(context).pop(); // Close the loading dialog
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error adding section: $e')),
+              );
             }
           },
           child: Text('Add'),
