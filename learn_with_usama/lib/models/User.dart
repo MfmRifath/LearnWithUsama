@@ -8,6 +8,7 @@ class AppUser {
   final bool notificationsEnabled;
   final bool soundEnabled;
   final bool vibrationEnabled;
+  final String role; // New field for user role
 
   AppUser({
     required this.uid,
@@ -17,6 +18,7 @@ class AppUser {
     required this.notificationsEnabled,
     required this.soundEnabled,
     required this.vibrationEnabled,
+    required this.role, // Initialize role
   });
 
   // Factory method to create an AppUser instance from Firebase Auth User
@@ -25,15 +27,17 @@ class AppUser {
     String? email,
     String? displayName,
     String? profilePictureUrl,
+    String role = 'viewer', // Default role
   }) {
     return AppUser(
       uid: uid,
       email: email,
       displayName: displayName,
       profilePictureUrl: profilePictureUrl,
-      notificationsEnabled: true, // Default values (can be customized)
+      notificationsEnabled: true,
       soundEnabled: true,
       vibrationEnabled: true,
+      role: role, // Set role
     );
   }
 
@@ -48,6 +52,7 @@ class AppUser {
       notificationsEnabled: data['notificationsEnabled'] ?? true,
       soundEnabled: data['soundEnabled'] ?? true,
       vibrationEnabled: data['vibrationEnabled'] ?? true,
+      role: data['role'] ?? 'viewer', // Fetch role from Firestore
     );
   }
 
@@ -60,6 +65,7 @@ class AppUser {
       'notificationsEnabled': notificationsEnabled,
       'soundEnabled': soundEnabled,
       'vibrationEnabled': vibrationEnabled,
+      'role': role, // Include role in the document
     };
   }
 
@@ -72,6 +78,7 @@ class AppUser {
     bool? notificationsEnabled,
     bool? soundEnabled,
     bool? vibrationEnabled,
+    String? role,
   }) {
     return AppUser(
       uid: uid ?? this.uid,
@@ -81,6 +88,7 @@ class AppUser {
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       soundEnabled: soundEnabled ?? this.soundEnabled,
       vibrationEnabled: vibrationEnabled ?? this.vibrationEnabled,
+      role: role ?? this.role, // Handle role updates
     );
   }
 }

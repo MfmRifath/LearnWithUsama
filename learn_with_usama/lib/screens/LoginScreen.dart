@@ -1,9 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:learn_with_usama/screens/Home.dart';
-import 'package:learn_with_usama/screens/RegisterScreen.dart';
-import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
 class LoginScreen extends StatefulWidget {
   static const String id = 'LoginScreen';
@@ -41,236 +40,242 @@ class _LoginScreenState extends State<LoginScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      resizeToAvoidBottomInset: true, // Automatically adjusts for keyboard
-      body: ModalProgressHUD(
-        inAsyncCall: showSpinner,
-        child: GestureDetector(
-          onTap: () {
-            FocusScope.of(context).unfocus(); // Dismiss the keyboard when tapping outside
-          },
-          child: Stack(
-            children: [
-              // Background Image
-              Container(
-                height: screenHeight,
-                width: screenWidth,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('images/BackgroundLogin.png'),
-                    fit: BoxFit.cover,
+      resizeToAvoidBottomInset: true,
+      body: Stack(
+        children: [
+          GestureDetector(
+            onTap: () {
+              FocusScope.of(context).unfocus();
+            },
+            child: Stack(
+              children: [
+                // Background Image
+                Container(
+                  height: screenHeight,
+                  width: screenWidth,
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('images/BackgroundLogin.png'),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
-              ),
-              // Color Overlay (Optional)
-              Container(
-                height: screenHeight,
-                width: screenWidth,
-                color: Colors.black.withOpacity(0.1), // Adjust the opacity as needed
-              ),
-              // Content inside SingleChildScrollView to prevent overflow
-              SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.07),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      SizedBox(height: screenHeight * 0.35),
-                      Text(
-                        'Login',
-                        style: GoogleFonts.nunito(
-                          textStyle: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: screenHeight * 0.045,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: screenHeight * 0.02),
-                      // Email TextField
-                      TextField(
-                        onChanged: (value) {
-                          email = value;
-                        },
-                        decoration: InputDecoration(
-                          labelText: 'Email',
-                          labelStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: screenHeight * 0.02,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
+                // Color Overlay (Optional)
+                Container(
+                  height: screenHeight,
+                  width: screenWidth,
+                  color: Colors.black.withOpacity(0.1),
+                ),
+                // Content inside SingleChildScrollView
+                SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.07),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        SizedBox(height: screenHeight * 0.35),
+                        Text(
+                          'Login',
+                          style: GoogleFonts.nunito(
+                            textStyle: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: screenHeight * 0.045,
                               color: Colors.white,
-                              width: 2.0,
                             ),
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.white,
-                              width: 4.0,
-                            ),
-                            borderRadius: BorderRadius.circular(8.0),
                           ),
                         ),
-                        style: TextStyle(
-                          color: Colors.white, // Text color in TextField
-                          fontSize: screenHeight * 0.02,
-                        ),
-                      ),
-                      SizedBox(height: screenHeight * 0.015),
-                      // Password TextField
-                      TextField(
-                        onChanged: (value) {
-                          password = value;
-                        },
-                        obscureText: true, // Hide password input
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          labelStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: screenHeight * 0.02,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.white,
-                              width: 2.0,
-                            ),
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.white,
-                              width: 4.0,
-                            ),
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                        ),
-                        style: TextStyle(
-                          color: Colors.white, // Text color in TextField
-                          fontSize: screenHeight * 0.02,
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/forgotPassword');
+                        SizedBox(height: screenHeight * 0.02),
+                        // Email TextField
+                        TextField(
+                          onChanged: (value) {
+                            email = value;
                           },
-                          child: Text(
-                            'Forgot Password?',
-                            style: GoogleFonts.nunito(
-                              textStyle: TextStyle(
+                          decoration: InputDecoration(
+                            labelText: 'Email',
+                            labelStyle: TextStyle(
+                              color: Colors.white,
+                              fontSize: screenHeight * 0.02,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
                                 color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: screenHeight * 0.018,
+                                width: 2.0,
                               ),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Colors.white,
+                                width: 4.0,
+                              ),
+                              borderRadius: BorderRadius.circular(8.0),
                             ),
                           ),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: screenHeight * 0.02,
+                          ),
                         ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(top: screenHeight * 0.015),
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            style: ButtonStyle(
-                              side: MaterialStateProperty.all(
-                                BorderSide(
-                                  color: Colors.white, // Border color
-                                  width: 3, // Border width
-                                ),
-                              ),
-                              shape: MaterialStateProperty.all(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8), // Rounded corners
-                                ),
-                              ),
+                        SizedBox(height: screenHeight * 0.015),
+                        // Password TextField
+                        TextField(
+                          onChanged: (value) {
+                            password = value;
+                          },
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            labelText: 'Password',
+                            labelStyle: TextStyle(
+                              color: Colors.white,
+                              fontSize: screenHeight * 0.02,
                             ),
-                            onPressed: () async {
-                              if (email.isNotEmpty && password.isNotEmpty) {
-                                setState(() {
-                                  showSpinner = true;
-                                });
-                                FocusScope.of(context).unfocus(); // Dismiss the keyboard before navigating
-                                try {
-                                  await _auth.signInWithEmailAndPassword(
-                                    email: email,
-                                    password: password,
-                                  );
-                                  Navigator.push(context, MaterialPageRoute(builder: (context)=> Home()));                                } on FirebaseAuthException catch (e) {
-                                  if (e.code == 'user-not-found') {
-                                    showErrorDialog('No user found for that email.');
-                                  } else if (e.code == 'wrong-password') {
-                                    showErrorDialog('Wrong password provided.');
-                                  } else if (e.code == 'invalid-email') {
-                                    showErrorDialog('Invalid email provided.');
-                                  } else {
-                                    showErrorDialog('An error occurred: ${e.message}');
-                                  }
-                                } catch (e) {
-                                  showErrorDialog('An unexpected error occurred: ${e.toString()}');
-                                  print('Unexpected error: $e'); // Log the error details
-                                } finally {
-                                  setState(() {
-                                    showSpinner = false;
-                                  });
-                                }
-                              } else {
-                                showErrorDialog('Please fill in both email and password fields.');
-                              }
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Colors.white,
+                                width: 2.0,
+                              ),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Colors.white,
+                                width: 4.0,
+                              ),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: screenHeight * 0.02,
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/forgotPassword');
                             },
                             child: Text(
-                              'Login',
-                              style: GoogleFonts.lato(
+                              'Forgot Password?',
+                              style: GoogleFonts.nunito(
                                 textStyle: TextStyle(
                                   color: Colors.white,
-                                  fontSize: screenHeight * 0.022,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: screenHeight * 0.018,
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      SizedBox(height: screenHeight * 0.05),
-                      Align(
-                        alignment: Alignment.center,
-                        child: Column(
-                          children: [
-                            Text(
-                              'Don\'t have an account?',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: screenHeight * 0.018,
+                        Padding(
+                          padding: EdgeInsets.only(top: screenHeight * 0.015),
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              style: ButtonStyle(
+                                side: MaterialStateProperty.all(
+                                  BorderSide(
+                                    color: Colors.white,
+                                    width: 3,
+                                  ),
+                                ),
+                                shape: MaterialStateProperty.all(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
                               ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  '/registration',
-                                );
+                              onPressed: () async {
+                                if (email.isNotEmpty && password.isNotEmpty) {
+                                  setState(() {
+                                    showSpinner = true;
+                                  });
+                                  FocusScope.of(context).unfocus();
+                                  try {
+                                    await _auth.signInWithEmailAndPassword(
+                                      email: email,
+                                      password: password,
+                                    );
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => Home()));
+                                  } on FirebaseAuthException catch (e) {
+                                    if (e.code == 'user-not-found') {
+                                      showErrorDialog('No user found for that email.');
+                                    } else if (e.code == 'wrong-password') {
+                                      showErrorDialog('Wrong password provided.');
+                                    } else if (e.code == 'invalid-email') {
+                                      showErrorDialog('Invalid email provided.');
+                                    } else {
+                                      showErrorDialog('An error occurred: ${e.message}');
+                                    }
+                                  } catch (e) {
+                                    showErrorDialog('An unexpected error occurred: ${e.toString()}');
+                                    print('Unexpected error: $e');
+                                  } finally {
+                                    setState(() {
+                                      showSpinner = false;
+                                    });
+                                  }
+                                } else {
+                                  showErrorDialog('Please fill in both email and password fields.');
+                                }
                               },
                               child: Text(
-                                'Register',
-                                style: GoogleFonts.nunito(
+                                'Login',
+                                style: GoogleFonts.lato(
                                   textStyle: TextStyle(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: screenHeight * 0.018,
+                                    fontSize: screenHeight * 0.022,
                                   ),
                                 ),
                               ),
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ],
+                        SizedBox(height: screenHeight * 0.05),
+                        Align(
+                          alignment: Alignment.center,
+                          child: Column(
+                            children: [
+                              Text(
+                                'Don\'t have an account?',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: screenHeight * 0.018,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/registration');
+                                },
+                                child: Text(
+                                  'Register',
+                                  style: GoogleFonts.nunito(
+                                    textStyle: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: screenHeight * 0.018,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+          // Circular Loader
+          if (showSpinner)
+            Center(
+              child: SpinKitDoubleBounce(
+                color: Colors.white,
+              ),
+            ),
+        ],
       ),
     );
   }

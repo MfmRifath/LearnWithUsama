@@ -1,25 +1,42 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import 'package:provider/provider.dart';
+import '../services/UserProvider.dart';
 
-import 'LoginScreen.dart';
-
-class RegisterScreen extends StatefulWidget {
-
+class RegistrationScreen extends StatefulWidget {
+  static const String id = 'RegistrationScreen';
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  _RegistrationScreenState createState() => _RegistrationScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _RegistrationScreenState extends State<RegistrationScreen> {
   final _auth = FirebaseAuth.instance;
-
-  bool showSpinner = false;
-
+  final _userProvider = UserProvider();
   String email = '';
   String password = '';
+  String displayName = '';
+  bool showSpinner = false;
+
+  void showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Error'),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +45,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     return Scaffold(
       resizeToAvoidBottomInset: true, // Automatically adjusts for keyboard
-      body: ModalProgressHUD(
-        inAsyncCall: showSpinner,
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus(); // Dismiss the keyboard when tapping outside
+        },
         child: Stack(
           children: [
             // Background Image
@@ -38,7 +57,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               width: screenWidth,
               decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('images/BackgroundLogin.png'),
+                  image: AssetImage('images/Background.png'),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -47,7 +66,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             Container(
               height: screenHeight,
               width: screenWidth,
-              color: Colors.black.withOpacity(0.1), // Adjust the opacity as needed
+              color: Colors.black.withOpacity(0.3), // Adjust the opacity as needed
             ),
             // Content inside SingleChildScrollView to prevent overflow
             SingleChildScrollView(
@@ -68,6 +87,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.02),
+                    // Display Name TextField
+                    TextField(
+                      onChanged: (value) {
+                        displayName = value;
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Display Name',
+                        labelStyle: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenHeight * 0.02,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.white,
+                            width: 2.0,
+                          ),
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.white,
+                            width: 4.0,
+                          ),
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      style: TextStyle(
+                        color: Colors.white, // Text color in TextField
+                        fontSize: screenHeight * 0.02,
+                      ),
+                    ),
+                    SizedBox(height: screenHeight * 0.015),
                     // Email TextField
                     TextField(
                       onChanged: (value) {
@@ -132,54 +183,66 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         fontSize: screenHeight * 0.02,
                       ),
                     ),
-                    Padding(
-                      padding: EdgeInsets.only(top: screenHeight * 0.015),
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          style: ButtonStyle(
-                            side: MaterialStateProperty.all(
-                              BorderSide(
-                                color: Colors.white, // Border color
-                                width: 3, // Border width
-                              ),
-                            ),
-                            shape: MaterialStateProperty.all(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8), // Rounded corners
-                              ),
-                            ),
+                    SizedBox(height: screenHeight * 0.03),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.black, backgroundColor: Colors.white, // Text color
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
                           ),
-                          onPressed: () async {
+                        ),
+                        onPressed: () async {
+                          if (email.isNotEmpty && password.isNotEmpty && displayName.isNotEmpty) {
                             setState(() {
                               showSpinner = true;
                             });
-
+                            FocusScope.of(context).unfocus(); // Dismiss the keyboard before navigating
                             try {
-                              if (email != TextInputType.emailAddress.toString()) {
-                                setState(() {
-                                  showSpinner = false;
-                                });
+                              final UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+                                email: email,
+                                password: password,
+                              );
+
+                              await userCredential.user?.updateProfile(displayName: displayName);
+
+                              // Add user to provider with role 'User'
+                              await _userProvider.addUser(
+                                userCredential.user!.uid,
+                                displayName,
+                                email,
+                                'images/profile.jpg', // Default profile picture URL
+                                'User', // User role
+                              );
+
+                              Navigator.pushNamed(context, '/home'); // Navigate to Home screen
+                            } on FirebaseAuthException catch (e) {
+                              if (e.code == 'weak-password') {
+                                showErrorDialog('The password provided is too weak.');
+                              } else if (e.code == 'email-already-in-use') {
+                                showErrorDialog('The account already exists for that email.');
+                              } else {
+                                showErrorDialog('An error occurred: ${e.message}');
                               }
-                              await _auth.createUserWithEmailAndPassword(
-                                  email: email, password: password);
+                            } catch (e) {
+                              showErrorDialog('An unexpected error occurred: ${e.toString()}');
+                              print('Unexpected error: $e'); // Log the error details
+                            } finally {
                               setState(() {
                                 showSpinner = false;
                               });
-                              Navigator.pushNamed(context, '/login/');
-                            } catch (e) {
-                              if (kDebugMode) {
-                                print(e);
-                              }
                             }
-                          },
-                          child: Text(
-                            'Register',
-                            style: GoogleFonts.lato(
-                              textStyle: TextStyle(
-                                color: Colors.white,
-                                fontSize: screenHeight * 0.022,
-                              ),
+                          } else {
+                            showErrorDialog('Please fill in all fields.');
+                          }
+                        },
+                        child: Text(
+                          'Register',
+                          style: GoogleFonts.lato(
+                            textStyle: TextStyle(
+                              color: Colors.black,
+                              fontSize: screenHeight * 0.022,
                             ),
                           ),
                         ),
@@ -191,7 +254,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: Column(
                         children: [
                           Text(
-                            'If you already have an account.',
+                            'Already have an account?',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: screenHeight * 0.018,
@@ -199,8 +262,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           TextButton(
                             onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context)=> LoginScreen()));
-
+                              Navigator.pushNamed(
+                                context,
+                                '/login',
+                              );
                             },
                             child: Text(
                               'Login',
@@ -220,6 +285,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
             ),
+            if (showSpinner)
+              Center(
+                child: SpinKitDualRing(color: Colors.white,)
+              ),
           ],
         ),
       ),

@@ -12,26 +12,37 @@ import '../models/Section.dart';
 import 'NotificationProvider.dart';
 import 'dart:math';
 
-Future<void> createAndStoreNotification(BuildContext context, String title,String body) async {
-  final notification = MyNotification(
-    title: title,
-    body: body,
-    date: DateTime.now(),
-  );
+import 'UserProvider.dart';
 
+Future<void> createAndStoreNotification(BuildContext context, String title, String body) async {
+  // Access the UserProvider to check if notifications are enabled
+  final userProvider = Provider.of<UserProvider>(context, listen: false);
+  final appUser = userProvider.appUser;
 
-  AwesomeNotifications().createNotification(
-    content: NotificationContent(
-      id: Random().nextInt(10000) ,
-      channelKey: '7135',
-      title: notification.title,
-      body: notification.body,
-              ),
-  );
+  // Check if notifications are enabled
+  if (appUser != null && appUser.notificationsEnabled) {
+    final notification = MyNotification(
+      title: title,
+      body: body,
+      date: DateTime.now(),
+    );
 
-  // Store the notification in Firestore via the provider
-  final notificationProvider = Provider.of<NotificationProvider>(context, listen: false);
-  await notificationProvider.addNotification(notification);
+    // Create and display the notification
+    AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: Random().nextInt(10000),
+        channelKey: '7135',
+        title: notification.title,
+        body: notification.body,
+      ),
+    );
+
+    // Store the notification in Firestore via the provider
+    final notificationProvider = Provider.of<NotificationProvider>(context, listen: false);
+    await notificationProvider.addNotification(notification);
+  } else {
+    print('Notifications are disabled, so the notification was not sent.');
+  }
 }
 
 Future<void> showAddCourseDialog(BuildContext context) async {

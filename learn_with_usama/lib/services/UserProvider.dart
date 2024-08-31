@@ -53,4 +53,52 @@ class UserProvider with ChangeNotifier {
       notifyListeners();  // Notify listeners after updating preferences
     }
   }
+
+List<AppUser> _users = [];
+
+  List<AppUser> get users => _users;
+
+  Future<void> fetchUsers() async {
+    // Fetch users from Firestore
+    try {
+      final userCollection = await _firestore.collection('users').get();
+      _users = userCollection.docs.map((doc) {
+        final data = doc.data();
+        return AppUser(
+          uid: doc.id,
+          profilePictureUrl: data['profilePictureUrl'],
+          displayName: data['displayName'],
+           notificationsEnabled: true, soundEnabled: true, vibrationEnabled: true,
+          role: data['role'],
+        );
+      }).toList();
+      notifyListeners();
+    } catch (e) {
+      print('Error fetching users: $e');
+    }
+  }
+
+  Future<void> deleteUser(AppUser user) async {
+    try {
+      await _firestore.collection('users').doc(user.uid).delete();
+      _users.removeWhere((u) => u.uid == user.uid);
+      notifyListeners();
+    } catch (e) {
+      print('Error deleting user: $e');
+      throw e;
+    }
+  }
+  Future<void> addUser(String uid, String displayName, String email, String profilePictureUrl, String role) async {
+    try {
+      await _firestore.collection('users').doc(uid).set({
+        'displayName': displayName,
+        'email': email,
+        'profilePictureUrl': profilePictureUrl,
+        'role': role, // Add user role
+      });
+    } catch (e) {
+      print('Error adding user: $e');
+      throw e;
+    }
+  }
 }

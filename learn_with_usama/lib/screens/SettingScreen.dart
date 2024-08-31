@@ -33,7 +33,7 @@ class SettingsPage extends StatelessWidget {
               SettingsTile(
                 icon: Icons.notifications_outlined,
                 title: 'Notifications',
-                onTap: () {Navigator.pushNamed(context, '/notification');},
+                onTap: () {Navigator.pushNamed(context, '/notificationSetting');},
               ),
               SettingsTile(
                 icon: Icons.lock_outline,

@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:learn_with_usama/models/Courses.dart';
@@ -19,20 +21,42 @@ class Theoryscreen extends StatefulWidget {
 
 class _TheoryscreenState extends State<Theoryscreen> {
   late final FirebaseFirestore firestore_;
+  bool _isAdmin = false;
 
   @override
   void initState() {
     super.initState();
     firestore_ = FirebaseFirestore.instance;
+    _fetchUserRole();
+  }
+
+  Future<void> _fetchUserRole() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        String role = userDoc['role'];
+        setState(() {
+          _isAdmin = role == 'Admin';
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching user role: $e');
+      }
+    }
+  }
+
+  Future<int> getUnitCount() async {
+    final querySnapshot = await firestore_.collection('units').get();
+    return querySnapshot.docs.length;
   }
 
   @override
   Widget build(BuildContext context) {
-    Future<int> getUnitCount() async {
-      final querySnapshot = await firestore_.collection('units').get();
-      return querySnapshot.docs.length;
-    }
-
     return Scaffold(
       drawer: NavDrawer(),
       body: SafeArea(
@@ -106,25 +130,26 @@ class _TheoryscreenState extends State<Theoryscreen> {
                 ),
               ),
             ),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: FloatingActionButton.extended(
-                  backgroundColor: Colors.pinkAccent,
-                  icon: Icon(Icons.add),
-                  label: Text("Add Unit"),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AddUnitDialog();
-                      },
-                    );
-                  },
+            if (_isAdmin)
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: FloatingActionButton.extended(
+                    backgroundColor: Colors.pinkAccent,
+                    icon: Icon(Icons.add),
+                    label: Text("Add Unit"),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AddUnitDialog();
+                        },
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),

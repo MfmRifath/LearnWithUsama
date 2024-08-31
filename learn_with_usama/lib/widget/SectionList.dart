@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../models/Section.dart';
@@ -27,6 +29,34 @@ class SectionList extends StatefulWidget {
 }
 
 class _SectionListState extends State<SectionList> {
+  bool _isAdmin = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserRole();
+  }
+
+  Future<void> _fetchUserRole() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        String role = userDoc['role'];
+        setState(() {
+          _isAdmin = role == 'Admin';
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching user role: $e');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Ensure no duplicate sections in the list
@@ -75,29 +105,33 @@ class _SectionListState extends State<SectionList> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8.0),
             ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.add),
-                  tooltip: 'Add Section',
-                  onPressed: () => showAddSectionDialog(context),
-                ),
-                IconButton(
-                  icon: Icon(Icons.edit),
-                  tooltip: 'Edit Section',
-                  onPressed: () => _showEditDialog(context, section),
-                ),
-                IconButton(
-                  icon: Icon(Icons.delete),
-                  tooltip: 'Delete Section',
-                  onPressed: () => _showDeleteConfirmation(context, section.sectionDoc!),
-                ),
-              ],
-            ),
+            trailing: _isAdmin ? _buildAdminActions(section) : null,
           );
         }).toList(),
       ),
+    );
+  }
+
+  Widget _buildAdminActions(Section section) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: Icon(Icons.add),
+          tooltip: 'Add Section',
+          onPressed: () => showAddSectionDialog(context),
+        ),
+        IconButton(
+          icon: Icon(Icons.edit),
+          tooltip: 'Edit Section',
+          onPressed: () => _showEditDialog(context, section),
+        ),
+        IconButton(
+          icon: Icon(Icons.delete),
+          tooltip: 'Delete Section',
+          onPressed: () => _showDeleteConfirmation(context, section.sectionDoc!),
+        ),
+      ],
     );
   }
 
@@ -114,14 +148,15 @@ class _SectionListState extends State<SectionList> {
             style: TextStyle(fontSize: 18.0, color: Colors.grey),
           ),
           SizedBox(height: 16.0),
-          ElevatedButton.icon(
-            onPressed: () => showAddSectionDialog(context),
-            icon: Icon(Icons.add),
-            label: Text('Add Section'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xffF37979),
+          if (_isAdmin)
+            ElevatedButton.icon(
+              onPressed: () => showAddSectionDialog(context),
+              icon: Icon(Icons.add),
+              label: Text('Add Section'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xffF37979),
+              ),
             ),
-          ),
         ],
       ),
     );

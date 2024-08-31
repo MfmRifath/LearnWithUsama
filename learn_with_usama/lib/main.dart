@@ -4,6 +4,7 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:learn_with_usama/root.dart';
+import 'package:learn_with_usama/screens/AddAdminScreen.dart';
 import 'package:learn_with_usama/screens/CourseScreen.dart';
 import 'package:learn_with_usama/screens/ForgetPasswordScreen.dart';
 import 'package:learn_with_usama/screens/Home.dart';
@@ -17,6 +18,7 @@ import 'package:learn_with_usama/screens/SecurityScreen.dart';
 import 'package:learn_with_usama/screens/SettingScreen.dart';
 import 'package:learn_with_usama/screens/TheoryScreen.dart';
 import 'package:learn_with_usama/screens/UnitsWidget.dart';
+import 'package:learn_with_usama/screens/UserDetailScreen.dart';
 import 'package:learn_with_usama/screens/editUserDetailScreen.dart';
 import 'package:learn_with_usama/services/NotificationProvider.dart';
 import 'package:learn_with_usama/services/UserProvider.dart';
@@ -93,7 +95,7 @@ class _learnWithUsamaState extends State<learnWithUsama> {
         routes: {
           '/': (context) => Root(),
           '/login/': (context) => LoginScreen(),
-          '/registration': (context) => RegisterScreen(),
+          '/registration': (context) => RegistrationScreen(),
           '/theoryScreen': (context) {
             final unitList = Provider.of<List<Unit>>(context);
             return Theoryscreen(unit: unitList);
@@ -111,6 +113,9 @@ class _learnWithUsamaState extends State<learnWithUsama> {
           '/security': (context) => SecurityScreen(),
           '/privacy': (context) => PrivacyPage(),
           '/notifications':(context) =>NotificationScreen(),
+          '/notificationSetting': (context) => NotificationPage(),
+          '/addAdmin': (context) => AddAdminScreen(),
+          '/userDetail': (context) => UsersScreen()
            },
       ),
     );

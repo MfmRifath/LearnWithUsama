@@ -6,7 +6,6 @@ import '../services/UserProvider.dart';
 class NotificationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Access the UserProvider
     final userProvider = Provider.of<UserProvider>(context);
     final appUser = userProvider.appUser;
 
@@ -21,7 +20,7 @@ class NotificationPage extends StatelessWidget {
         ),
       ),
       body: appUser == null
-          ? Center(child: SpinKitCircle(color: Color(0xffF37979)))  // Show loading while user data is being fetched
+          ? Center(child: SpinKitCircle(color: Color(0xffF37979)))
           : ListView(
         padding: EdgeInsets.all(16.0),
         children: [
@@ -54,7 +53,11 @@ class NotificationPage extends StatelessWidget {
               onTap: () {
                 // Handle notification tone change
               },
-              trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey.shade600),
+              trailing: Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Colors.grey.shade600,
+              ),
             ),
           ],
         ],

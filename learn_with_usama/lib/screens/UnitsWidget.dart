@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:learn_with_usama/models/Courses.dart';
 import 'package:learn_with_usama/models/Section.dart';
@@ -19,6 +22,34 @@ class Units extends StatefulWidget {
 }
 
 class _UnitsState extends State<Units> {
+  bool _isAdmin = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserRole();
+  }
+
+  Future<void> _fetchUserRole() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        String role = userDoc['role'];
+        setState(() {
+          _isAdmin = role == 'Admin';
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching user role: $e');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -52,7 +83,8 @@ class _UnitsState extends State<Units> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            trailing: Row(
+            trailing: _isAdmin
+                ? Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
@@ -68,7 +100,8 @@ class _UnitsState extends State<Units> {
                   },
                 ),
               ],
-            ),
+            )
+                : null,
           ),
         ),
       ),
