@@ -5,25 +5,31 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:learn_with_usama/root.dart';
 import 'package:learn_with_usama/screens/AddAdminScreen.dart';
-import 'package:learn_with_usama/screens/CourseScreen.dart';
 import 'package:learn_with_usama/screens/ForgetPasswordScreen.dart';
 import 'package:learn_with_usama/screens/Home.dart';
 import 'package:learn_with_usama/screens/LoginScreen.dart';
 import 'package:learn_with_usama/screens/NotificationListScreen.dart';
 import 'package:learn_with_usama/screens/NotificationScreen.dart';
+import 'package:learn_with_usama/screens/PaperScreens/PaperCourseScreen.dart';
+import 'package:learn_with_usama/screens/PaperScreens/PaperScreen.dart';
+import 'package:learn_with_usama/screens/PaperScreens/PaperWidget.dart';
 import 'package:learn_with_usama/screens/PrivacyScreen.dart';
 import 'package:learn_with_usama/screens/ProfileScreen.dart';
 import 'package:learn_with_usama/screens/RegisterScreen.dart';
 import 'package:learn_with_usama/screens/SecurityScreen.dart';
 import 'package:learn_with_usama/screens/SettingScreen.dart';
-import 'package:learn_with_usama/screens/TheoryScreen.dart';
-import 'package:learn_with_usama/screens/UnitsWidget.dart';
-import 'package:learn_with_usama/screens/UserDetailScreen.dart';
+import 'package:learn_with_usama/screens/TheoryExplanationPages/CourseScreen.dart';
+import 'package:learn_with_usama/screens/TheoryExplanationPages/TheoryScreen.dart';
+import 'package:learn_with_usama/screens/TheoryExplanationPages/UnitsWidget.dart';
 import 'package:learn_with_usama/screens/editUserDetailScreen.dart';
+import 'package:learn_with_usama/screens/UserDetailScreen.dart';
 import 'package:learn_with_usama/services/NotificationProvider.dart';
 import 'package:learn_with_usama/services/UserProvider.dart';
 import 'package:learn_with_usama/services/database.dart';
 import 'models/Courses.dart';
+import 'models/Paper.dart';
+import 'models/PaperCourse.dart';
+import 'models/PaperSection.dart';
 import 'models/Section.dart';
 import 'models/Unit.dart';
 import 'package:provider/provider.dart';
@@ -83,6 +89,18 @@ class _learnWithUsamaState extends State<learnWithUsama> {
           value: Database().sections,
           initialData: [],
         ),
+        StreamProvider<List<Paper>>.value(
+          value: Database().paper,
+          initialData: [],
+        ),
+        StreamProvider<List<PaperCourses>>.value(
+          value: Database().paperCourses,
+          initialData: [],
+        ),
+        StreamProvider<List<PaperSection>>.value(
+          value: Database().paperSections,
+          initialData: [],
+        ),
         ChangeNotifierProvider<UserProvider>(
           create: (_) => UserProvider()..initializeUser(),
         ),
@@ -115,7 +133,16 @@ class _learnWithUsamaState extends State<learnWithUsama> {
           '/notifications':(context) =>NotificationScreen(),
           '/notificationSetting': (context) => NotificationPage(),
           '/addAdmin': (context) => AddAdminScreen(),
-          '/userDetail': (context) => UsersScreen()
+          '/userDetail': (context) => UsersScreen(),
+          '/paperScreen': (context) {
+            final paperList = Provider.of<List<Paper>>(context);
+            return PaperScreen(paper: paperList);
+          },
+          '/paperCourseScreen': (context) {
+            final paperCourseList = Provider.of<List<PaperCourses>>(context);
+            final paperSectionList = Provider.of<List<PaperSection>>(context);
+            return PaperCourseScreen( section: paperSectionList, course: paperCourseList, paper: selectedPaper,);
+          },
            },
       ),
     );

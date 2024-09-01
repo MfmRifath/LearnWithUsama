@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import '../models/Unit.dart';
-import '../services/database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../../models/Unit.dart';
+import '../../services/database.dart';
 
 class EditUnitScreen extends StatefulWidget {
   final Unit unit;
@@ -19,6 +24,8 @@ class _EditUnitScreenState extends State<EditUnitScreen> {
   late TextEditingController _paymentController;
   late TextEditingController _overviewDescriptionController;
   bool _isLoading = false;
+  File? _newImage;
+  String? _currentImageUrl;
 
   @override
   void initState() {
@@ -27,6 +34,7 @@ class _EditUnitScreenState extends State<EditUnitScreen> {
     _unitNumberController = TextEditingController(text: widget.unit.unitNumber);
     _paymentController = TextEditingController(text: widget.unit.payment);
     _overviewDescriptionController = TextEditingController(text: widget.unit.overviewDescription);
+    _currentImageUrl = widget.unit.unitImageUrl;
   }
 
   @override
@@ -38,11 +46,29 @@ class _EditUnitScreenState extends State<EditUnitScreen> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    final pickedImage = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedImage != null) {
+      setState(() {
+        _newImage = File(pickedImage.path);
+      });
+    }
+  }
+
   Future<void> _saveChanges() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
+
+      String? newImageUrl;
+      if (_newImage != null) {
+        final storageRef = FirebaseStorage.instance.ref().child('units').child('${widget.unit.unitNumber}.jpg');
+        await storageRef.putFile(_newImage!);
+        newImageUrl = await storageRef.getDownloadURL();
+      } else {
+        newImageUrl = _currentImageUrl;
+      }
 
       Unit updatedUnit = Unit(
         documentId: widget.unit.documentId,
@@ -50,6 +76,7 @@ class _EditUnitScreenState extends State<EditUnitScreen> {
         unitNumber: _unitNumberController.text.trim(),
         payment: _paymentController.text.trim(),
         overviewDescription: _overviewDescriptionController.text.trim(),
+        unitImageUrl: newImageUrl, // Update image URL
       );
 
       try {
@@ -145,6 +172,21 @@ class _EditUnitScreenState extends State<EditUnitScreen> {
                     return null;
                   },
                 ),
+                SizedBox(height: 16.0),
+                ElevatedButton(
+                  onPressed: _pickImage,
+                  child: Text(_newImage == null ? 'Pick an Image' : 'Change Image'),
+                ),
+                if (_newImage != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: Image.file(_newImage!, height: 100),
+                  ),
+                if (_currentImageUrl != null && _newImage == null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: Image.network(_currentImageUrl!, height: 100),
+                  ),
                 SizedBox(height: 24.0),
                 _isLoading
                     ? SpinKitCubeGrid(color: Color(0xffF37979))

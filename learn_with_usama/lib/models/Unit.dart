@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
   late final String? unitNumber;
   late final String? unitName;
   late final String? payment;
+  late final String? unitImageUrl;
   late final String? overviewDescription;
   final String? documentId; // Document ID for Firestore operations
 
@@ -12,6 +13,7 @@ import 'package:flutter/material.dart';
      this.unitNumber,
      this.unitName,
       this.documentId,
+   this.unitImageUrl
   });
 
 

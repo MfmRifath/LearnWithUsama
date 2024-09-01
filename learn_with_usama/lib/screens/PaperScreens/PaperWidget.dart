@@ -2,26 +2,26 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:learn_with_usama/models/Courses.dart';
-import 'package:learn_with_usama/models/Section.dart';
-import 'package:learn_with_usama/models/Unit.dart';
+import 'package:learn_with_usama/screens/PaperScreens/AddPaperScreen.dart';
 import 'package:learn_with_usama/services/database.dart';
-import '../screens/AddUnitScreen.dart';
-import '../screens/EditUnitScreen.dart';
+import '../../models/Paper.dart';
+import '../../models/PaperCourse.dart';
+import '../../models/PaperSection.dart';
+import 'EditPaperScreen.dart';
 
-Unit selectedUnit = Unit();
+Paper selectedPaper = Paper();
 
-class Units extends StatefulWidget {
-  const Units({super.key, required this.unit, this.courses, this.section});
-  final Unit? unit;
-  final Courses? courses;
-  final Section? section;
+class Papers extends StatefulWidget {
+  const Papers({super.key, required this.paper, this.courses, this.section});
+  final Paper paper;
+  final PaperCourses? courses;
+  final PaperSection? section;
 
   @override
-  State<Units> createState() => _UnitsState();
+  State<Papers> createState() => _PapersState();
 }
 
-class _UnitsState extends State<Units> {
+class _PapersState extends State<Papers> {
   bool _isAdmin = false;
 
   @override
@@ -61,22 +61,22 @@ class _UnitsState extends State<Units> {
         ),
         child: InkWell(
           onTap: () {
-            selectedUnit = widget.unit!;
-            Navigator.pushNamed(context, '/courseScreen');
+
+              selectedPaper = widget.paper;
+              Navigator.pushNamed(context, '/paperCourseScreen');
           },
           child: ListTile(
             contentPadding: EdgeInsets.all(10.0),
             leading: ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
-              child: Image.asset(
-                'images/${widget.unit!.unitName}.jpg',
-                width: 50.0,
+              child: Image.network(
+                widget.paper.paperImageUrl ?? 'default_image_url',
                 height: 50.0,
-                fit: BoxFit.cover,
+                width: 50.0,
               ),
             ),
             title: Text(
-              '${widget.unit!.unitNumber}. ${widget.unit!.unitName}',
+              '${widget.paper.paperId ?? ''}. ${widget.paper.paperName ?? ''} ${widget.paper?.year ?? ''}',
               style: TextStyle(
                 color: Colors.black87,
                 fontSize: 16.0,
@@ -116,30 +116,30 @@ class _UnitsState extends State<Units> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
           ),
-          child: EditUnitScreen(
-            unit: widget.unit!,
+          child: EditPaperScreen(
+            paper: widget.paper,
           ),
         );
       },
     );
-  }
+    }
 
   void _showDeleteDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Delete Unit'),
-          content: Text('Are you sure you want to delete this unit? This action cannot be undone.'),
+          title: Text('Delete Paper'),
+          content: Text('Are you sure you want to delete this Paper? This action cannot be undone.'),
           actions: [
             TextButton(
               onPressed: () async {
                 try {
-                  await Database().deleteUnit(widget.unit!.documentId);
+                  await Database().deletePaper(widget.paper!.documentId);
                   Navigator.of(context).pop(); // Close the dialog
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Unit deleted successfully!'),
+                      content: Text('Paper deleted successfully!'),
                       backgroundColor: Colors.green,
                     ),
                   );
@@ -147,7 +147,7 @@ class _UnitsState extends State<Units> {
                   // Handle error gracefully
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Error deleting unit: $e'),
+                      content: Text('Error deleting paper: $e'),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -165,11 +165,11 @@ class _UnitsState extends State<Units> {
         );
       },
     );
-  }
+    }
 }
 
-class AddUnitDialog extends StatelessWidget {
-  const AddUnitDialog({super.key});
+class AddPaperDialog extends StatelessWidget {
+  const AddPaperDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +177,7 @@ class AddUnitDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15.0),
       ),
-      child: AddUnitScreen(),
+      child: AddPaperScreen(),
     );
   }
 }

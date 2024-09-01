@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import '../models/Section.dart';
-import '../models/Unit.dart';
-import '../services/database.dart';
 
-class EditSectionScreen extends StatefulWidget {
-  final Section section;
+import '../../models/PaperSection.dart';
+import '../../models/Section.dart';
+import '../../services/database.dart';
 
-  const EditSectionScreen({Key? key, required this.section}) : super(key: key);
+
+class PaperEditSectionScreen extends StatefulWidget {
+  final PaperSection section;
+
+  const PaperEditSectionScreen({Key? key, required this.section}) : super(key: key);
 
   @override
-  _EditSectionScreenState createState() => _EditSectionScreenState();
+  _PaperEditSectionScreenState createState() => _PaperEditSectionScreenState();
 }
 
-class _EditSectionScreenState extends State<EditSectionScreen> {
+class _PaperEditSectionScreenState extends State<PaperEditSectionScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _sectionNameController;
   late TextEditingController _sectionIdController;
   late TextEditingController _sectionUrlController;
   late TextEditingController _sectionDurationController;
   late TextEditingController _courseIdController;
-  late TextEditingController _unitIdController;
+  late TextEditingController _paperIdController;
   bool _isLoading = false;
 
   @override
@@ -31,7 +33,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
     _sectionUrlController = TextEditingController(text: widget.section.sectionUrl);
     _sectionDurationController = TextEditingController(text: widget.section.sectionDuration);
     _courseIdController =TextEditingController(text: widget.section.courseId);
-    _unitIdController = TextEditingController(text: widget.section.unitId );
+    _paperIdController = TextEditingController(text: widget.section.paperId );
   }
 
   @override
@@ -41,7 +43,7 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
     _sectionUrlController.dispose();
     _sectionDurationController.dispose();
     _courseIdController.dispose();
-    _unitIdController.dispose();
+    _paperIdController.dispose();
     super.dispose();
   }
 
@@ -51,18 +53,18 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
         _isLoading = true;
       });
 
-      Section updatedSection = Section(
+      PaperSection updatedSection = PaperSection(
         sectionDoc: widget.section.sectionDoc,
         sectionName: _sectionNameController.text.trim(),
         sectionId: _sectionIdController.text.trim(),
         sectionDuration: _sectionDurationController.text.trim(),
         sectionUrl: _sectionUrlController.text.trim(),
         courseId: _courseIdController.text.trim(),
-        unitId: _unitIdController.text.trim(),
+        paperId: _paperIdController.text.trim(),
       );
 
       try {
-        await Database().updateSection(updatedSection);
+        await Database().updatePaperSection(updatedSection);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Section updated successfully')),
         );
@@ -155,14 +157,14 @@ class _EditSectionScreenState extends State<EditSectionScreen> {
                 ),
                 SizedBox(height: 16.0),
                 TextFormField(
-                  controller: _unitIdController,
+                  controller: _paperIdController,
                   decoration: InputDecoration(
-                    labelText: 'Unit Id',
+                    labelText: 'Paper Id',
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter an Unit Id';
+                      return 'Please enter an Paper Id';
                     }
                     return null;
                   },

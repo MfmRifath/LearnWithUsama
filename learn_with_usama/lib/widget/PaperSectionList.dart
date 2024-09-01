@@ -3,20 +3,23 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import '../models/PaperSection.dart';
 import '../models/Section.dart';
 
+import '../screens/PaperScreens/PaperEditSectionScreen.dart';
 import '../screens/TheoryExplanationPages/EditSectionScreen.dart';
 import '../services/Course&SectionSevices.dart';
+import '../services/PaperCourse&SectionService.dart';
 import '../services/database.dart';
 
-class SectionList extends StatefulWidget {
+class PaperSectionList extends StatefulWidget {
   final Animation<double> animation;
-  final List<Section> items;
+  final List<PaperSection> items;
   final String? selectedItem;
   final void Function(String?)? onSectionTap;
   final FirebaseFirestore firestore;
 
-  const SectionList({
+  const PaperSectionList({
     Key? key,
     required this.animation,
     required this.items,
@@ -26,10 +29,10 @@ class SectionList extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<SectionList> createState() => _SectionListState();
+  State<PaperSectionList> createState() => _SectionListState();
 }
 
-class _SectionListState extends State<SectionList> {
+class _SectionListState extends State<PaperSectionList> {
   bool _isAdmin = false;
 
   @override
@@ -113,7 +116,7 @@ class _SectionListState extends State<SectionList> {
     );
   }
 
-  Widget _buildAdminActions(Section section) {
+  Widget _buildAdminActions(PaperSection section) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -151,7 +154,7 @@ class _SectionListState extends State<SectionList> {
           SizedBox(height: 16.0),
           if (_isAdmin)
             ElevatedButton.icon(
-              onPressed: () => showAddSectionDialog(context),
+              onPressed: () => showAddPaperSectionDialog(context),
               icon: Icon(Icons.add),
               label: Text('Add Section'),
               style: ElevatedButton.styleFrom(
@@ -163,13 +166,13 @@ class _SectionListState extends State<SectionList> {
     );
   }
 
-  void _showEditDialog(BuildContext context, Section section) {
+  void _showEditDialog(BuildContext context, PaperSection section) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Edit Section'),
-          content: EditSectionScreen(section: section),
+          content: PaperEditSectionScreen(section: section),
         );
       },
     );
@@ -186,9 +189,8 @@ class _SectionListState extends State<SectionList> {
             TextButton(
               onPressed: () async {
                 Navigator.of(context).pop(); // Close the dialog
-                _showLoadingDialog(context);
                 try {
-                  await Database().deleteSection(sectionId);
+                  await Database().deletePaperSection(sectionId);
                   Navigator.of(context).pop(); // Close the loading dialog
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Section deleted successfully')),
@@ -215,15 +217,5 @@ class _SectionListState extends State<SectionList> {
     );
   }
 
-  void _showLoadingDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Center(
-          child: SpinKitCubeGrid(),
-        );
-      },
-    );
-  }
+
 }

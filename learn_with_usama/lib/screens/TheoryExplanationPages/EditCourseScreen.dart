@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:learn_with_usama/models/Courses.dart';
-import '../models/Section.dart';
-import '../models/Unit.dart';
-import '../services/database.dart';
+
+import '../../services/database.dart';
+
 
 class EditCourseScreen extends StatefulWidget {
   final Courses course;

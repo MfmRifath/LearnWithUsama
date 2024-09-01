@@ -78,23 +78,19 @@ List<AppUser> _users = [];
     }
   }
 
-  Future<void> deleteUser(AppUser user) async {
-    try {
-      await _firestore.collection('users').doc(user.uid).delete();
-      _users.removeWhere((u) => u.uid == user.uid);
-      notifyListeners();
-    } catch (e) {
-      print('Error deleting user: $e');
-      throw e;
-    }
-  }
-  Future<void> addUser(String uid, String displayName, String email, String profilePictureUrl, String role) async {
+  Future<void> addUser(String uid, String displayName, String email, String profilePictureUrl, String role,   bool notificationsEnabled,
+   bool soundEnabled,
+   bool vibrationEnabled) async {
     try {
       await _firestore.collection('users').doc(uid).set({
         'displayName': displayName,
         'email': email,
         'profilePictureUrl': profilePictureUrl,
         'role': role, // Add user role
+        'notificationsEnabled' : notificationsEnabled,
+        'soundEnabled' : soundEnabled,
+        'vibrationEnabled': vibrationEnabled
+
       });
     } catch (e) {
       print('Error adding user: $e');

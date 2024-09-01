@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:learn_with_usama/screens/TheoryScreen.dart';
 import 'package:learn_with_usama/widget/NavDrawer.dart';
 import '../widget/AppBar.dart';
 
@@ -47,9 +46,9 @@ class _HomeState extends State<Home> {
               context,
               title: 'Paper Class Explanations',
               subtitle: 'Past Paper & Model Paper Discussions',
-              imagePath: 'images/landscape02.jpg',
+              imagePath: 'images/011.jpg',
               onPressed: () {
-                // Navigate to the appropriate screen
+               Navigator.pushNamed(context, '/paperScreen');
               },
             ),
           ],

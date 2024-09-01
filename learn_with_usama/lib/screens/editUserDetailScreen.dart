@@ -18,8 +18,7 @@ class _EditUserDetailsPageState extends State<EditUserDetailsPage> {
   late final TextEditingController _phoneController;
   File? _profileImage;
   bool _isLoading = false;
-  String? _verificationId;
-  String? _smsCode;
+
 
   @override
   void initState() {
@@ -75,79 +74,8 @@ class _EditUserDetailsPageState extends State<EditUserDetailsPage> {
     }
   }
 
-  Future<void> _verifyPhoneNumber() async {
-    try {
-      await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: _phoneController.text,
-        verificationCompleted: (PhoneAuthCredential credential) async {
-          await user?.updatePhoneNumber(credential);
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Phone number updated successfully.')));
-        },
-        verificationFailed: (FirebaseAuthException e) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Phone number verification failed: ${e.message}')));
-        },
-        codeSent: (String verificationId, int? resendToken) {
-          setState(() {
-            _verificationId = verificationId;
-          });
-          _showSmsCodeDialog();
-        },
-        codeAutoRetrievalTimeout: (String verificationId) {
-          setState(() {
-            _verificationId = verificationId;
-          });
-        },
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to verify phone number: $e')));
-    }
-  }
 
-  void _showSmsCodeDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Enter SMS Code'),
-          content: TextField(
-            onChanged: (value) {
-              setState(() {
-                _smsCode = value;
-              });
-            },
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              hintText: 'Enter SMS Code',
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: Text('Submit'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _submitVerificationCode();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
 
-  Future<void> _submitVerificationCode() async {
-    if (_verificationId == null || _smsCode == null || _smsCode!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please enter the verification code.')));
-      return;
-    }
-
-    try {
-      PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: _verificationId!, smsCode: _smsCode!);
-      await user?.updatePhoneNumber(credential);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Phone number updated successfully.')));
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update phone number: $e')));
-    }
-  }
 
   @override
   void dispose() {

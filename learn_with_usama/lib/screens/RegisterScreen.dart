@@ -213,7 +213,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 displayName,
                                 email,
                                 'images/profile.jpg', // Default profile picture URL
-                                'User', // User role
+                                'User',
+                                true,
+                                true,
+                                true// User role
                               );
 
                               Navigator.pushNamed(context, '/home'); // Navigate to Home screen

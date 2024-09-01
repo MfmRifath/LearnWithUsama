@@ -2,33 +2,33 @@ import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:learn_with_usama/services/Course&SectionSevices.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-import '../models/Section.dart';
-import '../models/Courses.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/Unit.dart';
-import '../widget/CourseList.dart';
-import '../widget/SectionList.dart';
-import '../widget/AppBar.dart';
+import '../../models/Paper.dart';
+import '../../models/PaperCourse.dart';
+import '../../models/PaperSection.dart';
 
-class CourseScreen extends StatefulWidget {
-  final List<Section> section;
-  final List<Courses> course;
-  final Unit unit;
+import '../../widget/AppBar.dart';
+import '../../widget/PaperCourseList.dart';
+import '../../widget/PaperSectionList.dart';
 
-  const CourseScreen({
+class PaperCourseScreen extends StatefulWidget {
+  final List<PaperSection> section;
+  final List<PaperCourses> course;
+  final Paper paper;
+
+  const PaperCourseScreen({
     Key? key,
     required this.section,
     required this.course,
-    required this.unit,
+    required this.paper,
   }) : super(key: key);
 
   @override
-  State<CourseScreen> createState() => _CourseScreenState();
+  State<PaperCourseScreen> createState() => _PaperCourseScreenState();
 }
 
-class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMixin {
+class _PaperCourseScreenState extends State<PaperCourseScreen> with TickerProviderStateMixin {
   late YoutubePlayerController _controller;
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -39,13 +39,16 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
   String? _selectedCourseId;
   bool isLesson = false;
   bool _isLoading = true; // Loading indicator flag
+  late FirebaseFirestore _firestore;
 
   @override
   void initState() {
     super.initState();
+    _firestore = FirebaseFirestore.instance;
     _initializeYoutubePlayer();
     _initializeAnimationController();
     _tabController = TabController(length: 2, vsync: this);
+
     // Simulate a network call or heavy processing
     Future.delayed(Duration(seconds: 2), () {
       setState(() {
@@ -126,15 +129,17 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
       child: Scaffold(
         body: SafeArea(
           child: _isLoading
-              ? Center(child: SpinKitCubeGrid(
-              color: Color(0xffF37979)
-          )) // Show loading indicator
+              ? Center(
+            child: SpinKitCubeGrid(
+              color: Color(0xffF37979),
+            ),
+          ) // Show loading indicator
               : YoutubePlayerBuilder(
             player: YoutubePlayer(controller: _controller),
             builder: (context, player) {
               return Column(
                 children: [
-                  AppBar1(page: '/theoryScreen'),
+                  AppBar1(page: '/paperScreen'),
                   player,
                   SizedBox(height: 15.0),
                   TabBar(
@@ -176,7 +181,7 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
               Row(
                 children: [
                   Text(
-                    widget.unit.unitName!,
+                    '${widget.paper.paperName!} ${widget.paper.year}',
                     style: GoogleFonts.nunito(
                       textStyle: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -199,7 +204,7 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
               ),
               SizedBox(height: 5.0),
               Text(
-                'RS: ${widget.unit.payment}/-',
+                'RS: ${widget.paper.payment}/-',
                 style: GoogleFonts.nunito(
                   textStyle: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -211,7 +216,7 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
               Padding(
                 padding: EdgeInsets.all(10.0),
                 child: Text(
-                  widget.unit.overviewDescription!,
+                  widget.paper.overviewDescription!,
                   style: GoogleFonts.nunito(
                     textStyle: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -226,7 +231,8 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
                 child: TextButton(
                   onPressed: () {},
                   style: ButtonStyle(
-                    backgroundColor: MaterialStatePropertyAll(Color(0xffF37979)),
+                    backgroundColor:
+                    MaterialStatePropertyAll(Color(0xffF37979)),
                   ),
                   child: Text(
                     'Get Enroll',
@@ -246,7 +252,18 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
   }
 
   Widget _buildLessonList() {
-    final filteredCourses = widget.course.where((course) => course.unitId == widget.unit.unitNumber).toList();
+    // Debugging: Print the course data
+    print('Total courses: ${widget.course.length}');
+    print('Paper ID: ${widget.paper.paperId}');
+
+    final filteredCourses = widget.course.where((course) =>
+    course.paperId == widget.paper.paperId).toList();
+
+    // Debugging: Print the filtered course data
+    print('Filtered courses count: ${filteredCourses.length}');
+    filteredCourses.forEach((course) {
+      print('Course ID: ${course.courseId}, Course Name: ${course.courseName}');
+    });
 
     if (filteredCourses.isEmpty) {
       return Expanded(
@@ -255,7 +272,7 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'No courses available for this unit.',
+                'No courses available for this paper.',
                 style: GoogleFonts.nunito(
                   textStyle: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -266,7 +283,7 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
               SizedBox(height: 20.0),
               TextButton(
                 onPressed: () {
-                  showAddCourseDialog(context);
+                  showAddPaperCourseDialog(context);
                 },
                 style: TextButton.styleFrom(
                   backgroundColor: Color(0xffF37979),
@@ -293,14 +310,16 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
           itemBuilder: (context, index) {
             final course = filteredCourses[index];
             final courseSections = widget.section
-                .where((section) => section.courseId == course.courseId && section.unitId == course.unitId)
+                .where((section) =>
+            section.courseId == course.courseId &&
+                section.paperId == course.paperId)
                 .toList();
 
             return AnimatedSize(
               duration: Duration(milliseconds: 300),
               child: Column(
                 children: [
-                  CourseList(
+                  PaperCourseList(
                     course: course,
                     toggle: () {
                       setState(() {
@@ -310,17 +329,20 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
                     },
                   ),
                   if (_selectedCourseId == course.courseId)
-                    SectionList(
+                    PaperSectionList(
                       animation: _animation,
                       items: courseSections,
                       selectedItem: _selectedItem,
                       onSectionTap: (sectionName) {
                         _onSectionTap(
                           sectionName!,
-                          courseSections.firstWhere((section) => section.sectionName == sectionName).sectionUrl ?? '',
+                          courseSections
+                              .firstWhere((section) =>
+                          section.sectionName == sectionName)
+                              .sectionUrl ?? '',
                         );
                       },
-                      firestore: FirebaseFirestore.instance,
+                      firestore: _firestore,
                     ),
                 ],
               ),
@@ -331,26 +353,28 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
     }
   }
 
-  Future<bool?> _showBackDialog(BuildContext context) {
-    return showDialog<bool>(
+  void showAddPaperCourseDialog(BuildContext context) {
+    showDialog(
       context: context,
-      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Are you sure?'),
+          title: Text('Add Course'),
+          content: TextField(
+            decoration: InputDecoration(hintText: 'Enter course details'),
+          ),
           actions: <Widget>[
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
               child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
             ),
             TextButton(
+              child: Text('Add'),
               onPressed: () {
-                _controller.pause();
-                Navigator.pushNamed(context, '/theoryScreen');
+                // Add course to Firestore
+                Navigator.of(context).pop();
               },
-              child: Text('Yes'),
             ),
           ],
         );
@@ -358,32 +382,25 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
     );
   }
 
-  void showAddCourseDialog(BuildContext context) {
-    showDialog(
+  Future<bool?> _showBackDialog(BuildContext context) async {
+    return showDialog<bool>(
       context: context,
-      builder: (context) {
+      builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Add New Course'),
-          content: TextField(
-            decoration: InputDecoration(hintText: "Course Name"),
-            onSubmitted: (value) {
-              // Handle course addition logic here
-              Navigator.of(context).pop();
-            },
-          ),
-          actions: [
+          title: Text('Exit'),
+          content: Text('Do you want to exit the screen?'),
+          actions: <Widget>[
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
               child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
             ),
             TextButton(
+              child: Text('Exit'),
               onPressed: () {
-                // Handle course addition logic here
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(true);
               },
-              child: Text('Add'),
             ),
           ],
         );

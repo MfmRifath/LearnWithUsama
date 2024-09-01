@@ -9,24 +9,28 @@ import 'package:flutter/material.dart';
 import 'package:learn_with_usama/services/database.dart';
 
 import '../models/Courses.dart';
+import '../models/PaperCourse.dart';
+import '../screens/PaperScreens/PaperEditCourseScreen.dart';
 import '../screens/TheoryExplanationPages/EditCourseScreen.dart';
 import '../services/Course&SectionSevices.dart';
+import '../services/PaperCourse&SectionService.dart';
 
-class CourseList extends StatefulWidget {
-  final Courses course;
+
+class PaperCourseList extends StatefulWidget {
+  final PaperCourses course;
   final VoidCallback toggle;
 
-  const CourseList({
+  const PaperCourseList({
     Key? key,
     required this.course,
     required this.toggle,
   }) : super(key: key);
 
   @override
-  State<CourseList> createState() => _CourseListState();
+  State<PaperCourseList> createState() => _PaperCourseListState();
 }
 
-class _CourseListState extends State<CourseList> {
+class _PaperCourseListState extends State<PaperCourseList> {
   bool _isAdmin = false;
 
   @override
@@ -79,15 +83,15 @@ class _CourseListState extends State<CourseList> {
                 children: [
                   IconButton(
                     icon: Icon(Icons.add),
-                    onPressed: () => showAddCourseDialog(context),
+                    onPressed: () => showAddPaperCourseDialog(context),
                   ),
                   IconButton(
                     icon: Icon(Icons.edit),
-                    onPressed: () => _showEditDialog(context, widget.course),
+                    onPressed: () => _showPaperEditDialog(context, widget.course),
                   ),
                   IconButton(
                     icon: Icon(Icons.delete),
-                    onPressed: () => showDeleteCourseDialog(context, widget.course.courseDoc!),
+                    onPressed: () => showPaperDeleteCourseDialog(context, widget.course.courseDoc!),
                   ),
                 ],
               ),
@@ -97,19 +101,19 @@ class _CourseListState extends State<CourseList> {
     );
   }
 
-  void _showEditDialog(BuildContext context, Courses course) {
+  void _showPaperEditDialog(BuildContext context, PaperCourses course) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Edit Course'),
-          content: EditCourseScreen(course: course),
+          content: PaperEditCourseScreen(course: course),
         );
       },
     );
   }
 
-  void showDeleteCourseDialog(BuildContext context, String courseId) {
+  void showPaperDeleteCourseDialog(BuildContext context, String courseId) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -120,7 +124,7 @@ class _CourseListState extends State<CourseList> {
             TextButton(
               onPressed: () async {
                 try {
-                  await Database().deleteCourse(courseId);
+                  await Database().deletePaperCourse(courseId);
                   Navigator.of(context).pop(); // Close the dialog
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Course deleted successfully')),

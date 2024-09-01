@@ -86,41 +86,7 @@ class _UsersScreenState extends State<UsersScreen> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               subtitle: Text(user.email ?? 'No Email'),
-              trailing: IconButton(
-                icon: Icon(Icons.delete, color: Colors.red),
-                onPressed: () async {
-                  final confirm = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text('Confirm Deletion'),
-                      content: Text('Are you sure you want to delete this user?'),
-                      actions: <Widget>[
-                        TextButton(
-                          child: Text('Cancel'),
-                          onPressed: () => Navigator.of(context).pop(false),
-                        ),
-                        TextButton(
-                          child: Text('Delete'),
-
-                          onPressed: () => Navigator.of(context).pop(true),
-                        ),
-                      ],
-                    ),
-                  );
-                  if (confirm == true) {
-                    try {
-                      await userProvider.deleteUser(user);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('User deleted successfully')),
-                      );
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Failed to delete user')),
-                      );
-                    }
-                  }
-                },
-              ),
+              trailing: Text(user.role ?? 'No Role')
             ),
           );
         },
