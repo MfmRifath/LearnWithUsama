@@ -106,7 +106,7 @@ class _NavDrawerState extends State<NavDrawer> {
                 ListTile(
                   leading: Icon(Icons.border_color),
                   title: Text('Feedback'),
-                  onTap: () => Navigator.of(context).pop(),
+                  onTap: () => Navigator.pushNamed(context, '/feedback'),
                 ),
                 if (_isAdmin)
                   ListTile(

@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:learn_with_usama/root.dart';
 import 'package:learn_with_usama/screens/AddAdminScreen.dart';
+import 'package:learn_with_usama/screens/FeedBackScreen.dart';
 import 'package:learn_with_usama/screens/ForgetPasswordScreen.dart';
 import 'package:learn_with_usama/screens/Home.dart';
 import 'package:learn_with_usama/screens/LoginScreen.dart';
@@ -23,6 +24,7 @@ import 'package:learn_with_usama/screens/TheoryExplanationPages/TheoryScreen.dar
 import 'package:learn_with_usama/screens/TheoryExplanationPages/UnitsWidget.dart';
 import 'package:learn_with_usama/screens/editUserDetailScreen.dart';
 import 'package:learn_with_usama/screens/UserDetailScreen.dart';
+import 'package:learn_with_usama/services/FeedbackProvider.dart';
 import 'package:learn_with_usama/services/NotificationProvider.dart';
 import 'package:learn_with_usama/services/UserProvider.dart';
 import 'package:learn_with_usama/services/database.dart';
@@ -105,6 +107,7 @@ class _learnWithUsamaState extends State<learnWithUsama> {
           create: (_) => UserProvider()..initializeUser(),
         ),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (context) => FeedbackProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -143,6 +146,7 @@ class _learnWithUsamaState extends State<learnWithUsama> {
             final paperSectionList = Provider.of<List<PaperSection>>(context);
             return PaperCourseScreen( section: paperSectionList, course: paperCourseList, paper: selectedPaper,);
           },
+          '/feedback':(context) => FeedbackScreen(),
            },
       ),
     );

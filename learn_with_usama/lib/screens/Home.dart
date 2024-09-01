@@ -46,7 +46,7 @@ class _HomeState extends State<Home> {
               context,
               title: 'Paper Class Explanations',
               subtitle: 'Past Paper & Model Paper Discussions',
-              imagePath: 'images/011.jpg',
+              imagePath: 'images/Exam.jpg',
               onPressed: () {
                Navigator.pushNamed(context, '/paperScreen');
               },

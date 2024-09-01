@@ -399,7 +399,7 @@ class _PaperCourseScreenState extends State<PaperCourseScreen> with TickerProvid
             TextButton(
               child: Text('Exit'),
               onPressed: () {
-                Navigator.of(context).pop(true);
+               Navigator.pushNamed(context, '/paperScreen');
               },
             ),
           ],
