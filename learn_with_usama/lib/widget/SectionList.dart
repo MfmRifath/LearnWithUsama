@@ -221,7 +221,7 @@ class _SectionListState extends State<SectionList> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return Center(
-          child: SpinKitCubeGrid(),
+          child: SpinKitCubeGrid(color:Color(0xffF37979)),
         );
       },
     );

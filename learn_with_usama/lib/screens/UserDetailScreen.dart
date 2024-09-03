@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:learn_with_usama/models/User.dart';
 import 'package:provider/provider.dart';
+import '../models/User.dart';
 import '../services/UserProvider.dart';
 
 class UsersScreen extends StatefulWidget {
@@ -79,14 +79,16 @@ class _UsersScreenState extends State<UsersScreen> {
               contentPadding: EdgeInsets.all(16),
               leading: CircleAvatar(
                 radius: 30,
-                backgroundImage: NetworkImage(user.profilePictureUrl ?? 'images/profile.jpg'),
+                backgroundImage: user.profilePictureUrl != null
+                    ? NetworkImage(user.profilePictureUrl!)
+                    : AssetImage('images/profile.jpg') as ImageProvider,
               ),
               title: Text(
                 user.displayName ?? 'No Name',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               subtitle: Text(user.email ?? 'No Email'),
-              trailing: Text(user.role ?? 'No Role')
+              trailing: Text(user.role ?? 'No Role'),
             ),
           );
         },

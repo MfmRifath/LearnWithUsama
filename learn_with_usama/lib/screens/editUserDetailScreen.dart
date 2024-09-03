@@ -4,6 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+
+import '../services/UserProvider.dart';
 
 class EditUserDetailsPage extends StatefulWidget {
   @override
@@ -63,7 +66,7 @@ class _EditUserDetailsPageState extends State<EditUserDetailsPage> {
       if (imageUrl != null) {
         await user?.updatePhotoURL(imageUrl);
       }
-
+      await  Provider.of<UserProvider>(context, listen: false).updateUser(uid:  user!.uid,displayName:  user!.displayName,email:  user!.email!,profilePictureUrl: user!.photoURL);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('User details updated successfully.')));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error updating details: $e')));
@@ -111,13 +114,13 @@ class _EditUserDetailsPageState extends State<EditUserDetailsPage> {
                           ? FileImage(_profileImage!)
                           : (user?.photoURL != null
                           ? NetworkImage(user!.photoURL!)
-                          : AssetImage('assets/placeholder.png')) as ImageProvider,
+                          : AssetImage('images/profile.png')) as ImageProvider,
                     ),
                     Positioned(
                       bottom: 0,
                       right: 0,
                       child: IconButton(
-                        icon: Icon(Icons.camera_alt, color: Colors.deepPurple),
+                        icon: Icon(Icons.camera_alt, color: Color(0xffF37979)),
                         onPressed: _pickImage,
                         tooltip: 'Change Profile Image',
                       ),

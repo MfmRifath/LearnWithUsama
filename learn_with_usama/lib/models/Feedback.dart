@@ -16,12 +16,13 @@ class Feedback1 {
   });
 
   factory Feedback1.fromDocument(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
     return Feedback1(
       id: doc.id,
-      message: doc['message'],
-      name: doc['name'],
-      profileImageUrl: doc['profileImageUrl'],
-      createdAt: doc['createdAt'],
+      message: data['message'] ?? '',
+      name: data['name'] ?? '',
+      profileImageUrl: data['profileImageUrl'] ?? '',
+      createdAt: data['createdAt'] ?? Timestamp.now(),
     );
   }
 }

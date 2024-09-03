@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/User.dart';
 
-
 class UserProvider with ChangeNotifier {
   AppUser? _appUser;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -54,46 +53,69 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-List<AppUser> _users = [];
+  List<AppUser> _users = [];
 
   List<AppUser> get users => _users;
 
   Future<void> fetchUsers() async {
-    // Fetch users from Firestore
     try {
-      final userCollection = await _firestore.collection('users').get();
-      _users = userCollection.docs.map((doc) {
-        final data = doc.data();
-        return AppUser(
-          uid: doc.id,
-          profilePictureUrl: data['profilePictureUrl'],
-          displayName: data['displayName'],
-           notificationsEnabled: true, soundEnabled: true, vibrationEnabled: true,
-          role: data['role'],
-        );
+      // Fetch users from Firestore
+      QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance.collection('users').get();
+      List<AppUser> fetchedUsers = snapshot.docs.map((doc) {
+        return AppUser.fromDocument(doc);
       }).toList();
+
+      _users = fetchedUsers;
       notifyListeners();
-    } catch (e) {
-      print('Error fetching users: $e');
+    } catch (error) {
+      print('Failed to fetch users: $error');
     }
   }
-
-  Future<void> addUser(String uid, String displayName, String email, String profilePictureUrl, String role,   bool notificationsEnabled,
-   bool soundEnabled,
-   bool vibrationEnabled) async {
+  Future<void> addUser(String uid, String displayName, String email, String profilePictureUrl, String role, bool notificationsEnabled, bool soundEnabled, bool vibrationEnabled) async {
     try {
       await _firestore.collection('users').doc(uid).set({
         'displayName': displayName,
         'email': email,
         'profilePictureUrl': profilePictureUrl,
         'role': role, // Add user role
-        'notificationsEnabled' : notificationsEnabled,
-        'soundEnabled' : soundEnabled,
+        'notificationsEnabled': notificationsEnabled,
+        'soundEnabled': soundEnabled,
         'vibrationEnabled': vibrationEnabled
-
       });
     } catch (e) {
       print('Error adding user: $e');
+      throw e;
+    }
+  }
+
+  Future<void> updateUser({String? uid,
+     String? displayName,
+    String? email,
+    String? profilePictureUrl,
+    String? role,
+    bool? notificationsEnabled,
+    bool? soundEnabled,
+    bool? vibrationEnabled,
+  }) async {
+    try {
+      final userDocRef = _firestore.collection('users').doc(uid);
+
+      final updateData = {
+        if (displayName != null) 'displayName': displayName,
+        if (email != null) 'email': email,
+        if (profilePictureUrl != null) 'profilePictureUrl': profilePictureUrl,
+        if (role != null) 'role': role,
+        if (notificationsEnabled != null) 'notificationsEnabled': notificationsEnabled,
+        if (soundEnabled != null) 'soundEnabled': soundEnabled,
+        if (vibrationEnabled != null) 'vibrationEnabled': vibrationEnabled,
+      };
+
+      await userDocRef.update(updateData);
+      // Optionally, you can also fetch the updated user data
+      // to ensure consistency in the app state.
+      await fetchUsers();
+    } catch (e) {
+      print('Error updating user: $e');
       throw e;
     }
   }

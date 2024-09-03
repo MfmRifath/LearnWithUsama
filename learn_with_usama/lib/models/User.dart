@@ -27,7 +27,7 @@ class AppUser {
     String? email,
     String? displayName,
     String? profilePictureUrl,
-    String role = 'viewer', // Default role
+    String role = 'User', // Default role
   }) {
     return AppUser(
       uid: uid,

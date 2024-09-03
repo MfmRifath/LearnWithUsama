@@ -23,6 +23,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   @override
   void initState() {
     super.initState();
+    Provider.of<FeedbackProvider>(context, listen: false).fetchFeedbacks();
     _loadCurrentUser();
   }
 
@@ -152,7 +153,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                 Row(
                   children: [
                     CircleAvatar(
-                      backgroundImage: NetworkImage(_currentUser!.profilePictureUrl! ?? ''),
+                      backgroundImage: NetworkImage(_currentUser!.profilePictureUrl!),
                       radius: 28.0,
                     ),
                     SizedBox(width: 16),
@@ -178,7 +179,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                 Align(
                   alignment: Alignment.bottomRight,
                   child: _isSubmitting
-                      ? SpinKitDoubleBounce(color: Colors.purple,)
+                      ? SpinKitDoubleBounce(color: Colors.purple)
                       : FloatingActionButton.extended(
                     onPressed: _submitFeedback,
                     icon: Icon(Icons.send),
@@ -193,6 +194,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                 SizedBox(height: 24),
                 Consumer<FeedbackProvider>(
                   builder: (context, feedbackProvider, child) {
+                    print('Feedback count: ${feedbackProvider.feedbacks.length}');
                     if (feedbackProvider.feedbacks.isEmpty) {
                       return Center(
                         child: Column(
@@ -219,6 +221,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                       itemCount: feedbackProvider.feedbacks.length,
                       itemBuilder: (context, index) {
                         final feedback = feedbackProvider.feedbacks[index];
+                        print('Feedback ${index + 1}: ${feedback.message}');
                         return Card(
                           margin: EdgeInsets.symmetric(vertical: 10),
                           shape: RoundedRectangleBorder(

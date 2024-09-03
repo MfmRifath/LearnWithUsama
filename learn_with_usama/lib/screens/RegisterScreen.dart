@@ -212,7 +212,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 userCredential.user!.uid,
                                 displayName,
                                 email,
-                                'images/profile.jpg', // Default profile picture URL
+                                'null', // Default profile picture URL
                                 'User',
                                 true,
                                 true,

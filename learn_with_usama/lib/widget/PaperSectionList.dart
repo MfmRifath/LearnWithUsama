@@ -123,7 +123,7 @@ class _SectionListState extends State<PaperSectionList> {
         IconButton(
           icon: Icon(Icons.add),
           tooltip: 'Add Section',
-          onPressed: () => showAddSectionDialog(context),
+          onPressed: () => showAddPaperSectionDialog(context),
         ),
         IconButton(
           icon: Icon(Icons.edit),

@@ -107,7 +107,7 @@ class _learnWithUsamaState extends State<learnWithUsama> {
           create: (_) => UserProvider()..initializeUser(),
         ),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
-        ChangeNotifierProvider(create: (context) => FeedbackProvider()),
+        ChangeNotifierProvider(create: (_) => FeedbackProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

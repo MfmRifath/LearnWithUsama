@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import '../models/Feedback.dart';
+import '../models/feedback.dart';
 
 class FeedbackProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -11,17 +10,25 @@ class FeedbackProvider with ChangeNotifier {
 
   Future<void> fetchFeedbacks() async {
     try {
-      QuerySnapshot snapshot = await _firestore.collection('feedback').get();
-      _feedbacks = snapshot.docs.map((doc) => Feedback1.fromDocument(doc)).toList();
+      print('Fetching feedbacks...');
+      QuerySnapshot snapshot = await _firestore
+          .collection('feedback')
+          .orderBy('createdAt', descending: true)
+          .get();
+      _feedbacks =
+          snapshot.docs.map((doc) => Feedback1.fromDocument(doc)).toList();
+      print('Fetched ${_feedbacks.length} feedbacks.');
       notifyListeners();
     } catch (e) {
       print('Error fetching feedbacks: $e');
     }
   }
 
-  Future<void> addFeedback(String message, String name, String profileImageUrl) async {
+  Future<void> addFeedback(
+      String message, String name, String profileImageUrl) async {
     try {
-      DocumentReference docRef = await _firestore.collection('feedback').add({
+      DocumentReference docRef =
+      await _firestore.collection('feedback').add({
         'message': message,
         'name': name,
         'profileImageUrl': profileImageUrl,

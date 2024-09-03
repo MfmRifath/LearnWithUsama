@@ -2,18 +2,13 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-
 import 'package:learn_with_usama/services/database.dart';
 import 'package:provider/provider.dart';
-import '../main.dart';
-import '../models/Courses.dart';
 import '../models/Notification.dart';
 import '../models/PaperCourse.dart';
 import '../models/PaperSection.dart';
-import '../models/Section.dart';
 import 'NotificationProvider.dart';
 import 'dart:math';
-
 import 'UserProvider.dart';
 
 Future<void> createAndStoreNotification(BuildContext context, String title, String body) async {
