@@ -219,7 +219,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 true// User role
                               );
 
-                              Navigator.pushNamed(context, '/home'); // Navigate to Home screen
+                              Navigator.pushNamed(context, '/login/'); // Navigate to Home screen
                             } on FirebaseAuthException catch (e) {
                               if (e.code == 'weak-password') {
                                 showErrorDialog('The password provided is too weak.');

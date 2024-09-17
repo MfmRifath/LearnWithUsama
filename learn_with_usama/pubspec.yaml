@@ -47,7 +47,7 @@ dependencies:
   whatsapp_share: ^2.0.2
   flutter_spinkit: ^5.2.1
   awesome_notifications: ^0.9.3+1
-
+  device_info_plus: ^10.1.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

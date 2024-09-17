@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:learn_with_usama/screens/Home.dart';
+import 'package:learn_with_usama/services/login.dart';
 
 class LoginScreen extends StatefulWidget {
   static const String id = 'LoginScreen';
@@ -192,12 +193,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                   });
                                   FocusScope.of(context).unfocus();
                                   try {
-                                    await _auth.signInWithEmailAndPassword(
-                                      email: email,
-                                      password: password,
-                                    );
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => Home()));
-                                  } on FirebaseAuthException catch (e) {
+                                    await loginUser(email, password, context, Home());
+                                     } on FirebaseAuthException catch (e) {
                                     if (e.code == 'user-not-found') {
                                       showErrorDialog('No user found for that email.');
                                     } else if (e.code == 'wrong-password') {

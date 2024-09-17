@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:learn_with_usama/services/login.dart';
 
 class NavDrawer extends StatefulWidget {
   @override
@@ -124,7 +125,7 @@ class _NavDrawerState extends State<NavDrawer> {
                   leading: Icon(Icons.exit_to_app),
                   title: Text('Logout'),
                   onTap: () async {
-                    await _signOut();
+                    await logoutUser(context, '/login/');
                   },
                 ),
               ],
