@@ -3,9 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:http/http.dart' as http;
 import '../models/Section.dart';
-
 import '../screens/TheoryExplanationPages/EditSectionScreen.dart';
+import '../screens/payHereForm.dart';
 import '../services/Course&SectionSevices.dart';
 import '../services/database.dart';
 
@@ -15,6 +16,7 @@ class SectionList extends StatefulWidget {
   final String? selectedItem;
   final void Function(String?)? onSectionTap;
   final FirebaseFirestore firestore;
+  final String amount;
 
   const SectionList({
     Key? key,
@@ -22,7 +24,7 @@ class SectionList extends StatefulWidget {
     required this.items,
     this.selectedItem,
     this.onSectionTap,
-    required this.firestore,
+    required this.firestore, required this.amount,
   }) : super(key: key);
 
   @override
@@ -31,11 +33,13 @@ class SectionList extends StatefulWidget {
 
 class _SectionListState extends State<SectionList> {
   bool _isAdmin = false;
+  bool _hasPaid = false;
 
   @override
   void initState() {
     super.initState();
     _fetchUserRole();
+    _checkPaymentStatus();
   }
 
   Future<void> _fetchUserRole() async {
@@ -58,11 +62,32 @@ class _SectionListState extends State<SectionList> {
     }
   }
 
+  Future<void> _checkPaymentStatus() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        DocumentSnapshot paymentDoc = await FirebaseFirestore.instance
+            .collection('payments')
+            .doc(user.uid)
+            .get();
+        setState(() {
+          _hasPaid = paymentDoc.exists && paymentDoc['status'] == 'paid';
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error checking payment status: $e');
+      }
+    }
+  }
+  
+
   @override
   Widget build(BuildContext context) {
     // Ensure no duplicate sections in the list
     final uniqueItems = widget.items.toSet().toList();
-    print(uniqueItems.map((e) => e.sectionName).toList()); // Debug print for list of sections
+    print(uniqueItems.map((e) => e.sectionName)
+        .toList()); // Debug print for list of sections
 
     return SizeTransition(
       sizeFactor: widget.animation,
@@ -71,13 +96,14 @@ class _SectionListState extends State<SectionList> {
           ? _buildEmptyState(context)
           : Column(
         children: uniqueItems.map((section) {
-          final bool isSelected = widget.selectedItem != null && widget.selectedItem == section.sectionName;
+          final bool isSelected = widget.selectedItem != null &&
+              widget.selectedItem == section.sectionName;
 
           return ListTile(
             contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
             leading: Icon(
-              isSelected ? Icons.stop_circle : Icons.play_circle,
-              color: isSelected ? Color(0xffF37979) : Colors.grey,
+              _hasPaid || _isAdmin ? (isSelected ? Icons.stop_circle : Icons.play_circle) : Icons.lock,
+              color: _hasPaid  || _isAdmin? (isSelected ? Color(0xffF37979) : Colors.grey) : Colors.red,
             ),
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,7 +111,8 @@ class _SectionListState extends State<SectionList> {
                 Text(
                   '${section.sectionId}. ${section.sectionName}',
                   style: TextStyle(
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight
+                        .normal,
                   ),
                 ),
                 Text(
@@ -98,8 +125,12 @@ class _SectionListState extends State<SectionList> {
               ],
             ),
             onTap: () {
-              if (widget.onSectionTap != null) {
-                widget.onSectionTap!(section.sectionName);
+              if (_hasPaid || _isAdmin) {
+                if (widget.onSectionTap != null) {
+                  widget.onSectionTap!(section.sectionName);
+                }
+              } else {
+                _showPaymentRequiredDialog();
               }
             },
             tileColor: isSelected ? Color(0xffF37979).withOpacity(0.1) : null,
@@ -130,7 +161,8 @@ class _SectionListState extends State<SectionList> {
         IconButton(
           icon: Icon(Icons.delete),
           tooltip: 'Delete Section',
-          onPressed: () => _showDeleteConfirmation(context, section.sectionDoc!),
+          onPressed: () =>
+              _showDeleteConfirmation(context, section.sectionDoc!),
         ),
       ],
     );
@@ -138,7 +170,7 @@ class _SectionListState extends State<SectionList> {
 
   Widget _buildEmptyState(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(16.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -221,9 +253,37 @@ class _SectionListState extends State<SectionList> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return Center(
-          child: SpinKitCubeGrid(color:Color(0xffF37979)),
+          child: SpinKitCubeGrid(color: Color(0xffF37979)),
         );
       },
     );
   }
+
+  void _showPaymentRequiredDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Payment Required'),
+          content: Text('You need to make a payment to access this content.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentFormPage(fixedAmount: widget.amount)));
+              },
+              child: Text('Make Payment'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 }

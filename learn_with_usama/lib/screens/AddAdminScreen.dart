@@ -18,6 +18,12 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (FirebaseAuth.instance.currentUser == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text('Feedback')),
+        body: Center(child: SpinKitHourGlass(color: Colors.black)),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text('Add Admin'),

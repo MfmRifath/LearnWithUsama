@@ -1,4 +1,5 @@
 import 'dart:core';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -123,7 +124,12 @@ class _PaperCourseScreenState extends State<PaperCourseScreen> with TickerProvid
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-
+    if (FirebaseAuth.instance.currentUser == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text('Feedback')),
+        body: Center(child: SpinKitHourGlass(color: Colors.black)),
+      );
+    }
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(

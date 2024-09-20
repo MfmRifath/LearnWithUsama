@@ -1,4 +1,5 @@
 import 'dart:core';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,9 +11,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/Courses.dart';
 import '../../models/Section.dart';
 import '../../models/Unit.dart';
+import '../../models/User.dart';
 import '../../widget/AppBar.dart';
 import '../../widget/CourseLIst.dart';
 import '../../widget/SectionList.dart';
+import '../payHereForm.dart';
 
 
 class CourseScreen extends StatefulWidget {
@@ -41,7 +44,10 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
   String url = '';
   String? _selectedCourseId;
   bool isLesson = false;
-  bool _isLoading = true; // Loading indicator flag
+  bool _isLoading = true;
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
@@ -129,6 +135,12 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
         .of(context)
         .size
         .height;
+    if (FirebaseAuth.instance.currentUser == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text('Please Login')),
+        body: Center(child: SpinKitHourGlass(color: Colors.black)),
+      );
+    }
 
     return WillPopScope(
       onWillPop: _onWillPop,
@@ -233,7 +245,9 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
               Align(
                 alignment: Alignment.center,
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentFormPage(fixedAmount: widget.unit.payment!,)));
+                  },
                   style: ButtonStyle(
                     backgroundColor: MaterialStatePropertyAll(
                         Color(0xffF37979)),
@@ -337,7 +351,7 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
                               .sectionUrl ?? '',
                         );
                       },
-                      firestore: FirebaseFirestore.instance,
+                      firestore: FirebaseFirestore.instance, amount: widget.unit.payment!,
                     ),
                 ],
               ),

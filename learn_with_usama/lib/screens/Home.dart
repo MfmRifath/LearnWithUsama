@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:learn_with_usama/widget/NavDrawer.dart';
 import '../widget/AppBar.dart';
@@ -12,8 +14,15 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
   @override
   Widget build(BuildContext context) {
+    if (FirebaseAuth.instance.currentUser == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text('Please Login')),
+        body: Center(child: SpinKitHourGlass(color: Colors.black)),
+      );
+    }
     return Scaffold(
       drawer: NavDrawer(),
       body: SafeArea(

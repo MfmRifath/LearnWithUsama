@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:learn_with_usama/models/Courses.dart';
 import 'package:learn_with_usama/models/Section.dart';
 import 'package:learn_with_usama/models/Unit.dart';
@@ -53,6 +54,12 @@ class _UnitsState extends State<Units> {
 
   @override
   Widget build(BuildContext context) {
+    if (FirebaseAuth.instance.currentUser == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text('Please Login')),
+        body: Center(child: SpinKitHourGlass(color: Colors.black)),
+      );
+    }
     return Padding(
       padding: EdgeInsets.all(8.0),
       child: Card(
