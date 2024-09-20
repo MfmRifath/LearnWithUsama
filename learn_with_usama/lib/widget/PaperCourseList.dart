@@ -5,14 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import 'package:learn_with_usama/services/database.dart';
-
-import '../models/Courses.dart';
 import '../models/PaperCourse.dart';
 import '../screens/PaperScreens/PaperEditCourseScreen.dart';
-import '../screens/TheoryExplanationPages/EditCourseScreen.dart';
-import '../services/Course&SectionSevices.dart';
 import '../services/PaperCourse&SectionService.dart';
 
 

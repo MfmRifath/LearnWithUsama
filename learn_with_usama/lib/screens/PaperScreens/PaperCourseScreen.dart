@@ -126,7 +126,7 @@ class _PaperCourseScreenState extends State<PaperCourseScreen> with TickerProvid
     double screenHeight = MediaQuery.of(context).size.height;
     if (FirebaseAuth.instance.currentUser == null) {
       return Scaffold(
-        appBar: AppBar(title: Text('Feedback')),
+        appBar: AppBar(title: Text('Please Login')),
         body: Center(child: SpinKitHourGlass(color: Colors.black)),
       );
     }
@@ -348,7 +348,7 @@ class _PaperCourseScreenState extends State<PaperCourseScreen> with TickerProvid
                               .sectionUrl ?? '',
                         );
                       },
-                      firestore: _firestore,
+                      firestore: _firestore, amount: widget.paper.payment!,
                     ),
                 ],
               ),

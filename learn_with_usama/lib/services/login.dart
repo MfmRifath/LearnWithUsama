@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'getDeviceId.dart';
 
+
 Future<void> loginUser(String email, String password, BuildContext context, Widget home) async {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -60,7 +61,6 @@ Future<void> loginUser(String email, String password, BuildContext context, Widg
 Future<void> logoutUser(BuildContext context, String screen) async {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
   try {
     String userId = _auth.currentUser!.uid;
     DocumentReference userRef = _firestore.collection('users').doc(userId);

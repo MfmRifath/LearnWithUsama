@@ -2,41 +2,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../services/payHere.dart';
 
-class PaymentFormPage extends StatefulWidget {
+class PaymentFormPageUnit extends StatefulWidget {
   final String fixedAmount;
+  final String unitId; // Pass the Unit's document ID
 
-  const PaymentFormPage({
+  const PaymentFormPageUnit({
     Key? key,
     required this.fixedAmount,
+    required this.unitId, // Accept the unitId as a parameter
   }) : super(key: key);
+
   @override
   _PaymentFormPageState createState() => _PaymentFormPageState();
 }
 
-class _PaymentFormPageState extends State<PaymentFormPage> {
-  bool _hasPaid = false;
+class _PaymentFormPageState extends State<PaymentFormPageUnit> {
+  bool isLoading = false;
 
-  Future<void> _checkPaymentStatus() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        DocumentSnapshot paymentDoc = await FirebaseFirestore.instance
-            .collection('payments')
-            .doc(user.uid)
-            .get();
-        setState(() {
-          _hasPaid = paymentDoc.exists && paymentDoc['status'] == 'paid';
-        });
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error checking payment status: $e');
-      }
-    }
-  }
   final _formKey = GlobalKey<FormState>();
 
   // Controllers for input fields
@@ -45,19 +29,15 @@ class _PaymentFormPageState extends State<PaymentFormPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
 
-  // The fixed amount value (e.g., 100.00 LKR)
-
-  bool isLoading = false;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pay with PayHere'),
-        backgroundColor: Colors.teal, // Consistent color branding
+        title: Text('Pay for Unit'),
+        backgroundColor: Colors.teal,
       ),
       body: isLoading
-          ? Center(child: SpinKitPouringHourGlass(color: Colors.green))
+          ? Center(child: CircularProgressIndicator())
           : Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
@@ -67,7 +47,7 @@ class _PaymentFormPageState extends State<PaymentFormPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Enter Payment Details',
+                  'Enter Payment Details for Unit ',
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -117,7 +97,7 @@ class _PaymentFormPageState extends State<PaymentFormPage> {
                 ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      _makePayment();
+                      _makePaymentForUnit(widget.unitId); // Pass unitId to payment function
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -142,20 +122,21 @@ class _PaymentFormPageState extends State<PaymentFormPage> {
     );
   }
 
-  // Function to trigger payment
-  void _makePayment() {
+  // Function to trigger payment for the unit
+  void _makePaymentForUnit(String unitId) {
     setState(() {
       isLoading = true;
     });
 
+    // Payment logic
     PayHereService.makePayment(
-      isSandbox: true, // Set to true for sandbox mode, false for live
-      merchantId: "1211149", // Replace with your actual Merchant ID
-      merchantSecret: "xyz", // Replace with your actual Merchant Secret
-      orderId: "Order12345", // Replace with unique order ID
-      items: "Sample Payment", // Replace with item description
-      amount: widget.fixedAmount, // Use the fixed, unchangeable amount here
-      currency: "LKR", // Currency, e.g., "LKR" or "USD"
+      isSandbox: true, // Sandbox mode
+      merchantId: "1211149", // Replace with actual Merchant ID
+      merchantSecret: "xyz", // Replace with actual Merchant Secret
+      orderId: "Order_$unitId", // Use the unit's ID in the order ID
+      items: "Unit Payment", // Description of the item
+      amount: widget.fixedAmount, // Fixed payment amount
+      currency: "LKR", // Currency type
       firstName: firstNameController.text,
       lastName: lastNameController.text,
       email: emailController.text,
@@ -163,25 +144,17 @@ class _PaymentFormPageState extends State<PaymentFormPage> {
       address: "No.1, Main Street", // Sample address
       city: "Colombo", // Sample city
       country: "Sri Lanka", // Sample country
-      notifyUrl: "https://your-backend-url.com/notify", // Optional backend notification URL
+      notifyUrl: "https://your-backend-url.com/notify", // Backend notification URL (optional)
       onSuccess: (paymentId) async {
-        // Update payment status in Firestore
-        final user = FirebaseAuth.instance.currentUser;
-        if (user != null) {
-          await FirebaseFirestore.instance.collection('payments').doc(user.uid).set({
-            'status': 'paid',
-            'paymentId': paymentId,
-            'amount': widget.fixedAmount,
-            // Include any other relevant payment details
-          });
-          // Refresh the payment status
-          _checkPaymentStatus();
-        }
+        // Update payment status in Firestore for the specific unit
+        await _updateUnitPaymentStatus(unitId!, paymentId);
+
+
         setState(() {
           isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Payment Successful: $paymentId")),
+          SnackBar(content: Text("Payment Successful for Unit: $unitId")),
         );
       },
       onError: (error) {
@@ -203,8 +176,22 @@ class _PaymentFormPageState extends State<PaymentFormPage> {
     );
   }
 
+  // Function to update Firestore with payment status
+  Future<void> _updateUnitPaymentStatus(String unitId, String paymentId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance.collection('units').doc(unitId).update({
+        'paymentStatus': 'paid',
+        'paymentId': paymentId,
+        'userId': user.uid,
+        'paidAmount': widget.fixedAmount,
+        'paymentDate': FieldValue.serverTimestamp(),
+      });
+    }
+  }
 
-  // Function to build input fields
+
+  // Helper function to build text fields
   Widget buildTextField({
     required TextEditingController controller,
     required String labelText,
@@ -234,7 +221,7 @@ class _PaymentFormPageState extends State<PaymentFormPage> {
     );
   }
 
-  // Function to build the fixed amount field
+  // Helper function to display fixed amount
   Widget buildFixedAmountField(String amount) {
     return TextFormField(
       initialValue: amount,

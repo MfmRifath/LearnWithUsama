@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:learn_with_usama/screens/PaidUseraandUnits.dart';
+import 'package:learn_with_usama/screens/PaidUsersandPapers.dart';
 import 'package:learn_with_usama/services/login.dart';
 
 class NavDrawer extends StatefulWidget {
@@ -38,22 +40,6 @@ class _NavDrawerState extends State<NavDrawer> {
     }
   }
 
-  Future<void> _signOut() async {
-    setState(() {
-      _isSigningOut = true;
-    });
-    try {
-      await FirebaseAuth.instance.signOut();
-      Navigator.pushReplacementNamed(context, '/');
-    } catch (e) {
-      // Handle sign out error
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error signing out: $e')));
-    } finally {
-      setState(() {
-        _isSigningOut = false;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -125,14 +111,44 @@ class _NavDrawerState extends State<NavDrawer> {
                   leading: Icon(Icons.exit_to_app),
                   title: Text('Logout'),
                   onTap: () async {
+                    setState(() {
+                      _isSigningOut = true; // Show the loading spinner
+                    });
                     await logoutUser(context, '/login/');
+                    setState(() {
+                      _isSigningOut = false; // Hide the loading spinner after logout
+                    });
+
                   },
+
+                ),
+                if (_isAdmin)
+                ListTile(
+                  leading: Icon(Icons.paid),
+                  title: Text('Paid Users and Unites'),
+                  onTap: () async {
+
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>PaidUsersAndUnitsScreen()));
+                  },
+
+                ),
+                if (_isAdmin)
+                ListTile(
+                  leading: Icon(Icons.paid),
+                  title: Text('Paid Users and Papers'),
+                  onTap: () async {
+
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>PaidUsersAndPapersScreen()));
+                  },
+
                 ),
               ],
             ),
             if (_isSigningOut)
               Center(
-                child: SpinKitFadingCube(color: Color(0xffF37979),),
+                child: SpinKitFadingCube(
+                  color: Color(0xffF37979),
+                ),
               ),
           ],
         ),

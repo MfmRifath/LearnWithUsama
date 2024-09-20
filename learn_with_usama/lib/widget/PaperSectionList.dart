@@ -2,13 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:learn_with_usama/screens/payHereFormPaper.dart';
 import '../models/PaperSection.dart';
-import '../models/Section.dart';
-
 import '../screens/PaperScreens/PaperEditSectionScreen.dart';
-import '../screens/TheoryExplanationPages/EditSectionScreen.dart';
-import '../services/Course&SectionSevices.dart';
 import '../services/PaperCourse&SectionService.dart';
 import '../services/database.dart';
 
@@ -18,6 +14,7 @@ class PaperSectionList extends StatefulWidget {
   final String? selectedItem;
   final void Function(String?)? onSectionTap;
   final FirebaseFirestore firestore;
+  final String amount;
 
   const PaperSectionList({
     Key? key,
@@ -25,7 +22,7 @@ class PaperSectionList extends StatefulWidget {
     required this.items,
     this.selectedItem,
     this.onSectionTap,
-    required this.firestore,
+    required this.firestore, required this.amount,
   }) : super(key: key);
 
   @override
@@ -34,11 +31,14 @@ class PaperSectionList extends StatefulWidget {
 
 class _SectionListState extends State<PaperSectionList> {
   bool _isAdmin = false;
+  bool _hasPaid = false;
+  Set<String> _paidUnitIds = {}; // Store paid unit IDs here
 
   @override
   void initState() {
     super.initState();
     _fetchUserRole();
+    _checkPaymentStatusForPapers();
   }
 
   Future<void> _fetchUserRole() async {
@@ -60,6 +60,52 @@ class _SectionListState extends State<PaperSectionList> {
       }
     }
   }
+  // Check if the user has paid for specific units
+  Future<void> _checkPaymentStatusForPapers() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        QuerySnapshot paymentDocs = await FirebaseFirestore.instance
+            .collection('papers')
+            .where('userId', isEqualTo: user.uid)
+            .where('paymentStatus', isEqualTo: 'paid')
+            .get();
+
+        for (var doc in paymentDocs.docs) {
+          final paymentData = doc.data() as Map<String, dynamic>;
+          final Timestamp? paymentDate = paymentData['paymentDate'];
+
+          if (paymentDate != null) {
+            final DateTime paymentDateTime = paymentDate.toDate();
+            final DateTime currentDateTime = DateTime.now();
+
+            // Check if more than 30 days have passed since payment
+            if (currentDateTime.difference(paymentDateTime).inDays >= 30) {
+              // Update payment status to "not paid" if more than one month has passed
+              await FirebaseFirestore.instance
+                  .collection('papers')
+                  .doc(doc.id)
+                  .update({
+                'paymentStatus': 'not paid',
+              });
+            } else {
+              // If the payment is still valid, store the unit ID as paid
+              _paidUnitIds.add(doc.id);
+            }
+          }
+        }
+
+        setState(() {
+          _hasPaid = _paidUnitIds.isNotEmpty;
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error checking payment status: $e');
+      }
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -75,12 +121,19 @@ class _SectionListState extends State<PaperSectionList> {
           : Column(
         children: uniqueItems.map((section) {
           final bool isSelected = widget.selectedItem != null && widget.selectedItem == section.sectionName;
+          final bool hasPaidForThisUnit = _paidUnitIds.contains(section.paperId);
+          // Lock sections if the user hasn't paid or isn't an admin
+          final bool canAccessSection = hasPaidForThisUnit || _isAdmin;
 
           return ListTile(
             contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-            leading: Icon(
-              isSelected ? Icons.stop_circle : Icons.play_circle,
-              color: isSelected ? Color(0xffF37979) : Colors.grey,
+            leading:Icon(
+              canAccessSection
+                  ? (isSelected ? Icons.stop_circle : Icons.play_circle)
+                  : Icons.lock,
+              color: canAccessSection
+                  ? (isSelected ? Color(0xffF37979) : Colors.grey)
+                  : Colors.red,
             ),
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,8 +154,12 @@ class _SectionListState extends State<PaperSectionList> {
               ],
             ),
             onTap: () {
-              if (widget.onSectionTap != null) {
-                widget.onSectionTap!(section.sectionName);
+              if (_hasPaid || _isAdmin) {
+                if (widget.onSectionTap != null) {
+                  widget.onSectionTap!(section.sectionName);
+                }
+              } else {
+                _showPaymentRequiredDialog(section.paperId!);
               }
             },
             tileColor: isSelected ? Color(0xffF37979).withOpacity(0.1) : null,
@@ -217,5 +274,30 @@ class _SectionListState extends State<PaperSectionList> {
     );
   }
 
-
+  _showPaymentRequiredDialog(String paperId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Payment Required'),
+          content: Text('You need to make a payment to access this content.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentFormPagePaper(fixedAmount: widget.amount, paperId:paperId )));
+              },
+              child: Text('Make Payment'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

@@ -15,7 +15,7 @@ import '../../models/User.dart';
 import '../../widget/AppBar.dart';
 import '../../widget/CourseLIst.dart';
 import '../../widget/SectionList.dart';
-import '../payHereForm.dart';
+import '../payHereFormUnit.dart';
 
 
 class CourseScreen extends StatefulWidget {
@@ -246,7 +246,7 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
                 alignment: Alignment.center,
                 child: TextButton(
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentFormPage(fixedAmount: widget.unit.payment!,)));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentFormPageUnit(fixedAmount: widget.unit.payment!, unitId: widget.unit.documentId!,)));
                   },
                   style: ButtonStyle(
                     backgroundColor: MaterialStatePropertyAll(
