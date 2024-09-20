@@ -57,7 +57,7 @@ class _UnitsState extends State<Units> {
     if (FirebaseAuth.instance.currentUser == null) {
       return Scaffold(
         appBar: AppBar(title: Text('Please Login')),
-        body: Center(child: SpinKitHourGlass(color: Colors.black)),
+        body: const Center(child: SpinKitHourGlass(color: Colors.black)),
       );
     }
     return Padding(
