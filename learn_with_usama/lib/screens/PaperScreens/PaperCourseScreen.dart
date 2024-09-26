@@ -145,7 +145,7 @@ class _PaperCourseScreenState extends State<PaperCourseScreen> with TickerProvid
             builder: (context, player) {
               return Column(
                 children: [
-                  AppBar1(page: '/paperScreen'),
+                  AppBar1(page: '/paperScreen', push:() => _controller.pause() ,),
                   player,
                   SizedBox(height: 15.0),
                   TabBar(

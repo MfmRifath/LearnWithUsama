@@ -135,6 +135,7 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
         .of(context)
         .size
         .height;
+
     if (FirebaseAuth.instance.currentUser == null) {
       return Scaffold(
         appBar: AppBar(title: Text('Please Login')),
@@ -155,7 +156,7 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
             builder: (context, player) {
               return Column(
                 children: [
-                  AppBar1(page: '/theoryScreen'),
+                  AppBar1(page: '/theoryScreen',push: () =>_controller.pause(),),
                   player,
                   SizedBox(height: 15.0),
                   TabBar(

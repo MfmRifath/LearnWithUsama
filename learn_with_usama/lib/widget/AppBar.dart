@@ -7,8 +7,9 @@ import '../services/Course&SectionSevices.dart';
 
 class AppBar1 extends StatefulWidget {
   final String page;
+   final  VoidCallback? push;
 
-  AppBar1({required this.page});
+  AppBar1({required this.page,this.push});
 
   @override
   State<AppBar1> createState() => _AppBar1State();
@@ -34,7 +35,12 @@ class _AppBar1State extends State<AppBar1> {
               if (widget.page.isEmpty) {
                 Navigator.pop(context);
               } else {
+                if(widget.push != null) {
+                  widget.push?.call();
+                }
                 Navigator.pushNamed(context, widget.page);
+
+
               }
             },
             icon: Icon(CupertinoIcons.back),
