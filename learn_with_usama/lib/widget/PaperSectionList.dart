@@ -32,7 +32,7 @@ class PaperSectionList extends StatefulWidget {
 class _SectionListState extends State<PaperSectionList> {
   bool _isAdmin = false;
   bool _hasPaid = false;
-  Set<String> _paidUnitIds = {}; // Store paid unit IDs here
+  Set<String> _paidPaperIds = {}; // Store paid unit IDs here
 
   @override
   void initState() {
@@ -65,11 +65,14 @@ class _SectionListState extends State<PaperSectionList> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
+        // Query all units where the user has paid
         QuerySnapshot paymentDocs = await FirebaseFirestore.instance
             .collection('papers')
-            .where('userId', isEqualTo: user.uid)
+            .where('userId', arrayContains: user.uid) // Check if user has access
             .where('paymentStatus', isEqualTo: 'paid')
             .get();
+
+        bool hasAccess = false;
 
         for (var doc in paymentDocs.docs) {
           final paymentData = doc.data() as Map<String, dynamic>;
@@ -80,32 +83,31 @@ class _SectionListState extends State<PaperSectionList> {
             final DateTime currentDateTime = DateTime.now();
 
             // Check if more than 30 days have passed since payment
-            if (currentDateTime.difference(paymentDateTime).inDays >= 30) {
-              // Update payment status to "not paid" if more than one month has passed
+            if (currentDateTime.difference(paymentDateTime).inDays < 30) {
+              // User still has access
+              hasAccess = true;
+              _paidPaperIds.add(doc['paperId']); // Store valid unit ID if needed
+            } else {
+              // Remove the user's ID from the 'userId' array in this document
               await FirebaseFirestore.instance
                   .collection('papers')
                   .doc(doc.id)
                   .update({
-                'paymentStatus': 'not paid',
+                'userId': FieldValue.arrayRemove([user.uid]), // Remove user ID
               });
-            } else {
-              // If the payment is still valid, store the unit ID as paid
-              _paidUnitIds.add(doc.id);
             }
           }
         }
 
+        // Update the state to reflect access based on payment status
         setState(() {
-          _hasPaid = _paidUnitIds.isNotEmpty;
+          _hasPaid = hasAccess; // Update access status based on payment
         });
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error checking payment status: $e');
-      }
+      print('Error checking payment status: $e');
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +123,7 @@ class _SectionListState extends State<PaperSectionList> {
           : Column(
         children: uniqueItems.map((section) {
           final bool isSelected = widget.selectedItem != null && widget.selectedItem == section.sectionName;
-          final bool hasPaidForThisUnit = _paidUnitIds.contains(section.paperId);
+          final bool hasPaidForThisUnit = _paidPaperIds.contains(section.paperId);
           // Lock sections if the user hasn't paid or isn't an admin
           final bool canAccessSection = hasPaidForThisUnit || _isAdmin;
 

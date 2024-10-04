@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:http/http.dart' as http;
 import '../models/Section.dart';
 import '../screens/TheoryExplanationPages/EditSectionScreen.dart';
 import '../screens/payHereFormUnit.dart';
@@ -24,7 +23,8 @@ class SectionList extends StatefulWidget {
     required this.items,
     this.selectedItem,
     this.onSectionTap,
-    required this.firestore, required this.amount,
+    required this.firestore,
+    required this.amount,
   }) : super(key: key);
 
   @override
@@ -35,6 +35,7 @@ class _SectionListState extends State<SectionList> {
   bool _isAdmin = false;
   bool _hasPaid = false;
   Set<String> _paidUnitIds = {}; // Store paid unit IDs here
+
   @override
   void initState() {
     super.initState();
@@ -67,11 +68,14 @@ class _SectionListState extends State<SectionList> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
+        // Query all units where the user has paid
         QuerySnapshot paymentDocs = await FirebaseFirestore.instance
             .collection('units')
-            .where('userId', isEqualTo: user.uid)
+            .where('userId', arrayContains: user.uid) // Check if user has access
             .where('paymentStatus', isEqualTo: 'paid')
             .get();
+
+        bool hasAccess = false;
 
         for (var doc in paymentDocs.docs) {
           final paymentData = doc.data() as Map<String, dynamic>;
@@ -82,40 +86,36 @@ class _SectionListState extends State<SectionList> {
             final DateTime currentDateTime = DateTime.now();
 
             // Check if more than 30 days have passed since payment
-            if (currentDateTime.difference(paymentDateTime).inDays >= 30) {
-              // Update payment status to "not paid" if more than one month has passed
+            if (currentDateTime.difference(paymentDateTime).inDays < 30) {
+              // User still has access
+              hasAccess = true;
+              _paidUnitIds.add(doc['unitNumber']); // Store valid unit ID if needed
+            } else {
+              // Remove the user's ID from the 'userId' array in this document
               await FirebaseFirestore.instance
                   .collection('units')
                   .doc(doc.id)
                   .update({
-                'paymentStatus': 'not paid',
+                'userId': FieldValue.arrayRemove([user.uid]), // Remove user ID
               });
-            } else {
-              // If the payment is still valid, store the unit ID as paid
-              _paidUnitIds.add(doc.id);
             }
           }
         }
 
+        // Update the state to reflect access based on payment status
         setState(() {
-          _hasPaid = _paidUnitIds.isNotEmpty;
+          _hasPaid = hasAccess; // Update access status based on payment
         });
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error checking payment status: $e');
-      }
+      print('Error checking payment status: $e');
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
     // Ensure no duplicate sections in the list
     final uniqueItems = widget.items.toSet().toList();
-    print(uniqueItems.map((e) => e.sectionName)
-        .toList()); // Debug print for list of sections
 
     return SizeTransition(
       sizeFactor: widget.animation,
@@ -129,6 +129,7 @@ class _SectionListState extends State<SectionList> {
           final bool hasPaidForThisUnit = _paidUnitIds.contains(section.unitId);
           // Lock sections if the user hasn't paid or isn't an admin
           final bool canAccessSection = hasPaidForThisUnit || _isAdmin;
+
           return ListTile(
             contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
             leading: Icon(
@@ -145,8 +146,8 @@ class _SectionListState extends State<SectionList> {
                 Text(
                   '${section.sectionId}. ${section.sectionName}',
                   style: TextStyle(
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight
-                        .normal,
+                    fontWeight:
+                    isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
                 Text(
@@ -159,7 +160,7 @@ class _SectionListState extends State<SectionList> {
               ],
             ),
             onTap: () {
-              if (_hasPaid || _isAdmin) {
+              if (canAccessSection) {
                 if (widget.onSectionTap != null) {
                   widget.onSectionTap!(section.sectionName);
                 }
@@ -167,7 +168,8 @@ class _SectionListState extends State<SectionList> {
                 _showPaymentRequiredDialog(section.unitId!);
               }
             },
-            tileColor: isSelected ? Color(0xffF37979).withOpacity(0.1) : null,
+            tileColor:
+            isSelected ? Color(0xffF37979).withOpacity(0.1) : null,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8.0),
             ),
@@ -195,8 +197,7 @@ class _SectionListState extends State<SectionList> {
         IconButton(
           icon: Icon(Icons.delete),
           tooltip: 'Delete Section',
-          onPressed: () =>
-              _showDeleteConfirmation(context, section.sectionDoc!),
+          onPressed: () => _showDeleteConfirmation(context, section.sectionDoc!),
         ),
       ],
     );
@@ -304,7 +305,15 @@ class _SectionListState extends State<SectionList> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentFormPageUnit(fixedAmount: widget.amount,unitId: unitId,)));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PaymentFormPageUnit(
+                      fixedAmount: widget.amount,
+                      unitId: unitId,
+                    ),
+                  ),
+                );
               },
               child: Text('Make Payment'),
             ),
@@ -319,5 +328,4 @@ class _SectionListState extends State<SectionList> {
       },
     );
   }
-
 }

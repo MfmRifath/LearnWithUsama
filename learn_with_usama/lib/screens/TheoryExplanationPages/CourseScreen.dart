@@ -247,7 +247,7 @@ class _CourseScreenState extends State<CourseScreen> with TickerProviderStateMix
                 alignment: Alignment.center,
                 child: TextButton(
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentFormPageUnit(fixedAmount: widget.unit.payment!, unitId: widget.unit.documentId!,)));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentFormPageUnit(fixedAmount: widget.unit.payment!, unitId: widget.unit.documentId!, )));
                   },
                   style: ButtonStyle(
                     backgroundColor: MaterialStatePropertyAll(

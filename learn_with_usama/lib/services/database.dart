@@ -22,6 +22,10 @@ class Database with ChangeNotifier {
           overviewDescription: data['overviewDescription'] as String? ?? '',
           unitImageUrl: data['unitImageUrl'] as String ?? '',
           documentId: document.id,
+          paymentStatus:  data['paymentStatus'] as String ?? '',
+          userId: List<String>.from(data['userId'] ?? []),
+          paymentId: List<String>.from(data['paymentId'] ?? []),
+          paymentDate: (data['paymentDate'] as Timestamp?)?.toDate(),
         );
       }).toList();
     }).handleError((error) {
@@ -61,6 +65,7 @@ class Database with ChangeNotifier {
           courseId: data['courseId'] as String? ?? '',
           sectionDoc: document.id,
             unitId: data['unitId'] as String? ?? '',
+
         );
       }).toList();
     }).handleError((error) {
@@ -77,7 +82,12 @@ class Database with ChangeNotifier {
         'unitName': unit.unitName,
         'payment': unit.payment,
         'overviewDescription': unit.overviewDescription,
-        'unitImageUrl': unit.unitImageUrl
+        'unitImageUrl': unit.unitImageUrl,
+        'paymentStatus':'not paid',
+        'userId': [], // Initialize as an empty array
+      'paymentId': [], // Initialize as an empty array
+        'paymentDate': '',
+
       });
       notifyListeners();
     } catch (e) {
@@ -93,7 +103,7 @@ class Database with ChangeNotifier {
         'unitName': unit.unitName,
         'payment': unit.payment,
         'overviewDescription': unit.overviewDescription,
-        'unitImageUrl':unit.unitImageUrl
+        'unitImageUrl':unit.unitImageUrl,
       });
       notifyListeners();
     } catch (e) {
@@ -223,6 +233,11 @@ class Database with ChangeNotifier {
           overviewDescription: data['overviewDescription'] as String? ?? '',
           paperImageUrl: data['paperImageUrl'] as String ?? '',
           documentId: document.id,
+          paymentStatus:  data['paymentStatus'] as String ?? '',
+          userId: List<String>.from(data['userId'] ?? []),
+          paymentId: List<String>.from(data['paymentId'] ?? []),
+          paymentDate: (data['paymentDate'] as Timestamp?)?.toDate(),
+
         );
       }).toList();
     }).handleError((error) {
@@ -280,6 +295,10 @@ class Database with ChangeNotifier {
         'payment': paper.payment,
         'overviewDescription': paper.overviewDescription,
         'paperImageUrl' : paper.paperImageUrl,
+        'paymentStatus':'not paid',
+        'userId': [], // Initialize as an empty array
+        'paymentId': [], // Initialize as an empty array
+        'paymentDate': '',
       });
       notifyListeners();
     } catch (e) {

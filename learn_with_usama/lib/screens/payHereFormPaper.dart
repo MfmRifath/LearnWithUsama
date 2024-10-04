@@ -1,11 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:learn_with_usama/models/Unit.dart';
 import '../services/payHere.dart';
 
 class PaymentFormPagePaper extends StatefulWidget {
   final String fixedAmount;
+
   final String paperId; // Pass the Unit's document ID
 
   const PaymentFormPagePaper({
@@ -33,7 +34,7 @@ class _PaymentFormPageState extends State<PaymentFormPagePaper> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pay for Unit'),
+        title: Text('Pay for Paper Class'),
         backgroundColor: Colors.teal,
       ),
       body: isLoading
@@ -47,7 +48,7 @@ class _PaymentFormPageState extends State<PaymentFormPagePaper> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Enter Payment Details for Paper',
+                  'Enter Payment Details for Paper ',
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -97,7 +98,7 @@ class _PaymentFormPageState extends State<PaymentFormPagePaper> {
                 ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      _makePaymentForPaper(widget.paperId); // Pass unitId to payment function
+                      _makePaymentForUnit(widget.paperId); // Pass unitId to payment function
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -123,8 +124,7 @@ class _PaymentFormPageState extends State<PaymentFormPagePaper> {
   }
 
   // Function to trigger payment for the unit
-
-  void _makePaymentForPaper(String paperId) {
+  void _makePaymentForUnit(String paperId) {
     setState(() {
       isLoading = true;
     });
@@ -132,10 +132,10 @@ class _PaymentFormPageState extends State<PaymentFormPagePaper> {
     // Payment logic
     PayHereService.makePayment(
       isSandbox: true, // Sandbox mode
-      merchantId: "1211149", // Replace with actual Merchant ID
-      merchantSecret: "xyz", // Replace with actual Merchant Secret
+      merchantId: "1228326", // Replace with actual Merchant ID
+      merchantSecret: "MTQ2NDM2MTIyMDIyODA0ODMzNTMzODkyNTU0MTQzMDI5NjY3MjQ3", // Replace with actual Merchant Secret
       orderId: "Order_$paperId", // Use the unit's ID in the order ID
-      items: "Unit Payment", // Description of the item
+      items: "Paper Class Payment", // Description of the item
       amount: widget.fixedAmount, // Fixed payment amount
       currency: "LKR", // Currency type
       firstName: firstNameController.text,
@@ -148,14 +148,13 @@ class _PaymentFormPageState extends State<PaymentFormPagePaper> {
       notifyUrl: "https://your-backend-url.com/notify", // Backend notification URL (optional)
       onSuccess: (paymentId) async {
         // Update payment status in Firestore for the specific unit
-        await _updatePaperPaymentStatus(paperId, paymentId);
-
+        await _updateUnitPaymentStatus(paperId, paymentId);
 
         setState(() {
           isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Payment Successful for Unit: $paperId")),
+          SnackBar(content: Text("Payment Successful for Paper Class: $paperId")),
         );
       },
       onError: (error) {
@@ -176,18 +175,49 @@ class _PaymentFormPageState extends State<PaymentFormPagePaper> {
       },
     );
   }
-  Future<void> _updatePaperPaymentStatus(String paperId, String paymentId) async {
+
+  Future<void> _updateUnitPaymentStatus(String paperId, String paymentId) async {
     final user = FirebaseAuth.instance.currentUser;
+
     if (user != null) {
-      await FirebaseFirestore.instance.collection('papers').doc(paperId).update({
-        'paymentStatus': 'paid',
-        'paymentId': paymentId,
-        'userId': user.uid,
-        'paidAmount': widget.fixedAmount,
-        'paymentDate': FieldValue.serverTimestamp(),
-      });
+      try {
+        // Query for the document where the 'unitNumber' field matches the provided unitId
+        final querySnapshot = await FirebaseFirestore.instance
+            .collection('papers')
+            .where('paperId', isEqualTo: paperId) // Change this to the field name
+            .limit(1)
+            .get();
+
+        // Check if any documents are returned
+        if (querySnapshot.docs.isEmpty) {
+          print("No paper class with paper Id: $paperId found");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Paper with Paper Id: $paperId not found")),
+          );
+          return;
+        }
+
+        // Get the document reference of the first match (since .limit(1) is used)
+        final docRef = querySnapshot.docs.first.reference;
+
+        // Update the document if it exists
+        await docRef.update({
+          'paymentStatus': 'paid',
+          'paymentId': FieldValue.arrayUnion([paymentId]),
+          'userId': FieldValue.arrayUnion([user.uid]),
+          'paymentDate': FieldValue.serverTimestamp(),
+        });
+
+        print("Payment status updated successfully for Unit: $paperId");
+      } catch (e) {
+        print("Error updating payment status for Unit: $paperId, Error: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error updating payment status: $e")),
+        );
+      }
     }
   }
+
 
   // Helper function to build text fields
   Widget buildTextField({

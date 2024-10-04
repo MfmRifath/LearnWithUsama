@@ -51,7 +51,7 @@ class _StartScreenState extends State<StartScreen> {
                           ),
                         ),
                         Text(
-                          'LearnWithUsama',
+                          'MathsWithUsama',
                           style: GoogleFonts.nunito(
                             textStyle: TextStyle(
                               fontWeight: FontWeight.bold,

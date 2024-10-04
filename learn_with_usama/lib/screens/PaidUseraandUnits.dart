@@ -8,6 +8,7 @@ class PaidUsersAndUnitsScreen extends StatefulWidget {
 
 class _PaidUsersAndUnitsScreenState extends State<PaidUsersAndUnitsScreen> {
   bool isLoading = true;
+  bool errorOccurred = false;
   List<Map<String, dynamic>> paidUsers = [];
 
   @override
@@ -17,43 +18,47 @@ class _PaidUsersAndUnitsScreenState extends State<PaidUsersAndUnitsScreen> {
   }
 
   Future<void> _fetchPaidUsersAndUnits() async {
+    setState(() {
+      isLoading = true;
+      errorOccurred = false;
+    });
+
     try {
-      // Fetch users with payment status 'paid'
-      QuerySnapshot userSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .where('paymentStatus', isEqualTo: 'paid')
-          .get();
+      print('Fetching users...');
+      QuerySnapshot userSnapshot = await FirebaseFirestore.instance.collection('users').get();
+      List<Map<String, dynamic>> usersWithPaidUnits = [];
 
-      List<Map<String, dynamic>> usersWithUnits = [];
-
-      // Iterate over each user document
       for (var userDoc in userSnapshot.docs) {
         String userId = userDoc.id;
-        String userName = userDoc['displayName'] ?? 'Unnamed User'; // Use displayName field from AppUser
+        String userName = userDoc['displayName'] ?? 'Unnamed User';
+        print('User ID: $userId, User Name: $userName');
 
-        // Fetch units associated with the user and payment status 'paid'
         QuerySnapshot unitSnapshot = await FirebaseFirestore.instance
             .collection('units')
-            .where('userId', isEqualTo: userId)
+            .where('userId', arrayContains: userId) // Fix this condition
             .where('paymentStatus', isEqualTo: 'paid')
             .get();
 
-        // Extract the paid unit IDs
-        List<String> paidUnitIds = unitSnapshot.docs.map((doc) => doc['unitId'] as String).toList();
+        List<String> paidUnitIds = unitSnapshot.docs.map((doc) => doc['unitNumber'] as String).toList();
 
-        usersWithUnits.add({
-          'userName': userName,
-          'paidUnits': paidUnitIds,
-        });
+        if (paidUnitIds.isNotEmpty) {
+          usersWithPaidUnits.add({
+            'userName': userName,
+            'paidUnits': paidUnitIds,
+          });
+        }
       }
 
-      // Update state with the fetched data
       setState(() {
-        paidUsers = usersWithUnits;
-        isLoading = false;
+        paidUsers = usersWithPaidUnits;
       });
     } catch (e) {
       print('Error fetching paid users and units: $e');
+      setState(() {
+        errorOccurred = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+    } finally {
       setState(() {
         isLoading = false;
       });
@@ -68,26 +73,57 @@ class _PaidUsersAndUnitsScreenState extends State<PaidUsersAndUnitsScreen> {
         backgroundColor: Colors.teal,
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Loading paid users and units...'),
+          ],
+        ),
+      )
+          : errorOccurred
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Error fetching data. Please try again.'),
+            ElevatedButton(
+              onPressed: _fetchPaidUsersAndUnits,
+              child: Text('Retry'),
+            ),
+          ],
+        ),
+      )
           : paidUsers.isEmpty
           ? Center(child: Text('No Paid Users Found'))
           : ListView.builder(
         itemCount: paidUsers.length,
         itemBuilder: (context, index) {
           final user = paidUsers[index];
-          return ExpansionTile(
-            title: Text(user['userName']),
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: user['paidUnits']
-                      .map<Widget>((unitId) => Text('- Unit ID: $unitId'))
-                      .toList(),
-                ),
+          return Card(
+            margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: ExpansionTile(
+              title: Row(
+                children: [
+                  Icon(Icons.person, color: Colors.teal),
+                  SizedBox(width: 8),
+                  Text(user['userName']),
+                ],
               ),
-            ],
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: user['paidUnits']
+                        .map<Widget>((unitId) => Text('- Unit ID: $unitId'))
+                        .toList(),
+                  ),
+                ),
+              ],
+            ),
           );
         },
       ),

@@ -1,11 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:learn_with_usama/models/Unit.dart';
 import '../services/payHere.dart';
 
 class PaymentFormPageUnit extends StatefulWidget {
   final String fixedAmount;
+
   final String unitId; // Pass the Unit's document ID
 
   const PaymentFormPageUnit({
@@ -131,8 +132,8 @@ class _PaymentFormPageState extends State<PaymentFormPageUnit> {
     // Payment logic
     PayHereService.makePayment(
       isSandbox: true, // Sandbox mode
-      merchantId: "1211149", // Replace with actual Merchant ID
-      merchantSecret: "xyz", // Replace with actual Merchant Secret
+      merchantId: "1228326", // Replace with actual Merchant ID
+      merchantSecret: "MTQ2NDM2MTIyMDIyODA0ODMzNTMzODkyNTU0MTQzMDI5NjY3MjQ3", // Replace with actual Merchant Secret
       orderId: "Order_$unitId", // Use the unit's ID in the order ID
       items: "Unit Payment", // Description of the item
       amount: widget.fixedAmount, // Fixed payment amount
@@ -147,8 +148,7 @@ class _PaymentFormPageState extends State<PaymentFormPageUnit> {
       notifyUrl: "https://your-backend-url.com/notify", // Backend notification URL (optional)
       onSuccess: (paymentId) async {
         // Update payment status in Firestore for the specific unit
-        await _updateUnitPaymentStatus(unitId!, paymentId);
-
+        await _updateUnitPaymentStatus(unitId, paymentId);
 
         setState(() {
           isLoading = false;
@@ -176,17 +176,46 @@ class _PaymentFormPageState extends State<PaymentFormPageUnit> {
     );
   }
 
-  // Function to update Firestore with payment status
   Future<void> _updateUnitPaymentStatus(String unitId, String paymentId) async {
     final user = FirebaseAuth.instance.currentUser;
+
     if (user != null) {
-      await FirebaseFirestore.instance.collection('units').doc(unitId).update({
-        'paymentStatus': 'paid',
-        'paymentId': paymentId,
-        'userId': user.uid,
-        'paidAmount': widget.fixedAmount,
-        'paymentDate': FieldValue.serverTimestamp(),
-      });
+      try {
+        // Query for the document where the 'unitNumber' field matches the provided unitId
+        final querySnapshot = await FirebaseFirestore.instance
+            .collection('units')
+            .where('unitNumber', isEqualTo: unitId) // Change this to the field name
+            .limit(1)
+            .get();
+
+        // Check if any documents are returned
+        if (querySnapshot.docs.isEmpty) {
+          print("No unit with Unit Number: $unitId found");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Unit with Unit Number: $unitId not found")),
+          );
+          return;
+        }
+
+        // Get the document reference of the first match (since .limit(1) is used)
+        final docRef = querySnapshot.docs.first.reference;
+
+        // Update the document if it exists
+        await docRef.update({
+          'paymentStatus': 'paid',
+          'paymentId': FieldValue.arrayUnion([paymentId]),
+          'userId': FieldValue.arrayUnion([user.uid]),
+          'paidAmount': widget.fixedAmount,
+          'paymentDate': FieldValue.serverTimestamp(),
+        });
+
+        print("Payment status updated successfully for Unit: $unitId");
+      } catch (e) {
+        print("Error updating payment status for Unit: $unitId, Error: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error updating payment status: $e")),
+        );
+      }
     }
   }
 

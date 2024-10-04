@@ -1,19 +1,24 @@
+class Unit {
+ final String? unitNumber;
+ final String? unitName;
+ final String? payment;
+ final String? paymentStatus;
+ final String? unitImageUrl;
+ final String? overviewDescription;
+ final List<String>? userId; // Ensure this is a list of dynamic values
+ final String? documentId;
+ final List<String>? paymentId;
+ final DateTime? paymentDate;
 
-
- class Unit  {
-  late final String? unitNumber;
-  late final String? unitName;
-  late final String? payment;
-  late final String? unitImageUrl;
-  late final String? overviewDescription;
-  final String? documentId; // Document ID for Firestore operations
-
-  Unit({this.overviewDescription, this.payment,
-     this.unitNumber,
-     this.unitName,
-      this.documentId,
-   this.unitImageUrl
-  });
-
-
+ Unit({this.paymentDate,
+  this.unitNumber,
+  this.unitName,
+  this.payment,
+  this.paymentStatus,
+  this.unitImageUrl,
+  this.overviewDescription,
+  this.documentId,
+  this.userId,
+  this.paymentId// Required field must be initialized in constructor
+ });
 }
